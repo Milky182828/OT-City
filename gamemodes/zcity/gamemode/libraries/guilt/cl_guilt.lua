@@ -1,9 +1,3 @@
---[[    TO-DO
-    -- Добавить менюшку с прощением! |
-    -- Добавить нетворкинг |
-    -- Ну и все | 
---]]
-
 hook.Add("OnNetVarSet", "Guilt",function(index, key, var)
     if key == "Karma" then
         Entity(index).Karma = var
@@ -11,9 +5,6 @@ hook.Add("OnNetVarSet", "Guilt",function(index, key, var)
 end)
 
 hook.Add("Player Spawn", "GuiltKnown",function(ply)
-    --if (ply == LocalPlayer()) and ply.Karma then
-    --    ply:ChatPrint("Your current karma is "..tostring(math.Round(ply.Karma)).."")
-    --end
 end)
 
 concommand.Add("hg_getkarma",function(ply)
@@ -25,10 +16,10 @@ end)
 
 net.Receive("get_karma",function(len)
     local tbl = net.ReadTable()
-    local printTbl = "\nPlayers karma: \n"
+    local printTbl = "\nКарма игроков: \n"
 
     for id,karma in pairs(tbl) do
-        printTbl = printTbl.."\t"..(Player(id):Name().."'s karma is "..math.Round(karma,2)).."\n"
+        printTbl = printTbl.."\t"..(Player(id):Name().." карма "..math.Round(karma,2)).."\n"
     end
 
     LocalPlayer():PrintMessage(HUD_PRINTCONSOLE,printTbl)
@@ -52,15 +43,15 @@ local BlurBackground = hg.BlurBackground
 
 local function harmdone(harm)
     if harm >= 9 then
-        return "killed you."
+        return "убил тебя."
     elseif harm >= 5 then
-        return "basically killed you."
+        return "практически убил тебя."
     elseif harm >= 2 then
-        return "seriously injured you."
+        return "серьёзно ранил тебя."
     elseif harm >= 1 then
-        return "mildly injured you."
+        return "слегка ранил тебя."
     else
-        return "damaged you a bit."
+        return "немного повредил тебя."
     end
 end
 
@@ -78,7 +69,7 @@ hook.Add("HUDPaint","shownotification",function()
     if showstuff > CurTime() then
         local w, h = ScrW(), ScrH()
         local x, y = w / 2, h / 25 * 24
-        local txt = "Press F to open forgiveness menu."
+        local txt = "Нажми F, чтобы открыть меню прощения."
         surface.SetFont( "HomigradFontBig" )
         surface.SetTextColor(255,255,255,255)
         local w, h = surface.GetTextSize(txt)
@@ -124,7 +115,7 @@ OpenMenu = function(tbl)
         surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 
         local x, y = w / 2, h / 2
-        local txt = "Exit"
+        local txt = "Выход"
         surface.SetFont("HomigradFont")
         surface.SetTextColor(255,255,255,255)
         local w, h = surface.GetTextSize(txt)
@@ -160,7 +151,7 @@ OpenMenu = function(tbl)
         but.ply = ply
         but.name = ply:Name()
         but.harm = harm
-        local txt = "Forgive "..but.name.."? You will forgive him "..math.Round(but.harm,1).." karma."
+        local txt = "Простить "..but.name.."? Ты простишь ему "..math.Round(but.harm,1).." кармы."
         local clr = 255
         but.Paint = function(self,w,h)
             BlurBackground(self)
@@ -180,7 +171,6 @@ OpenMenu = function(tbl)
             net.Start("forgive_player")
             net.WriteEntity(ply)
             net.SendToServer()
-            --self:Remove()
             tbl[ply] = nil
             OpenMenu(tbl)
         end

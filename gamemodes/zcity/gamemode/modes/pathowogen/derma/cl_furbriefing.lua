@@ -13,10 +13,10 @@ function PANEL:Init()
 	self.dialogue = self:Add("ZB_DialogueFur")
 	self.dialogue:SetPos(ScrW() / 2 - self.dialogue:GetWide() / 2, ScrH() / 2 - self.dialogue:GetTall() / 2)
 
-	self.dialogue:SetText("Meow meow meow meow meow, meow meow meow, meow meow meow meow meow meow, meow meow meow meow. OwO. Meow meow meow meow. Meow meow, meow meow meow.", 2)
+	self.dialogue:SetText("Мяу мяу мяу мяу. Мяу мяу мяу! Мрррр..... UWU!", 2)
 	timer.Simple(15, function()
 		if !IsValid(self) then return end
-		self.dialogue:SetText("Meow. :3")
+		self.dialogue:SetText("МЯУ! :3")
 
 		self:SetKeyboardInputEnabled(false)
 

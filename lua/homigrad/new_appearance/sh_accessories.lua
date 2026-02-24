@@ -1,10 +1,14 @@
---
 hg = hg or {}
+hg.Accessories = hg.Accessories or {}
 
-local bandanamat = Material("mats_jack_gmod_sprites/respirator_vignette.png")
+-- FIX: Materiał definiujemy tylko dla klienta, żeby nie crashować serwera
+local bandanamat
+if CLIENT then
+    bandanamat = Material("mats_jack_gmod_sprites/respirator_vignette.png")
+end
 
 hg.Accessories = {
-	["none"] = {},
+    ["none"] = {},
 
     ["eyeglasses"] = {
         model = "models/captainbigbutt/skeyler/accessories/glasses01.mdl",
@@ -319,7 +323,7 @@ hg.Accessories = {
         norender = true,
         placement = "face",
         ScreenSpaceEffects = function()
-            -- DrawColorModify(AviatorColor)
+            if not bandanamat then return end
             surface.SetMaterial(bandanamat)
             surface.SetDrawColor(255,255,255)
             surface.DrawTexturedRect(-1,0,ScrW()*1.01,ScrH()*1.2)
@@ -340,7 +344,7 @@ hg.Accessories = {
         norender = true,
         placement = "face",
         ScreenSpaceEffects = function()
-            -- DrawColorModify(AviatorColor)
+            if not bandanamat then return end
             surface.SetMaterial(bandanamat)
             surface.SetDrawColor(255,255,255)
             surface.DrawTexturedRect(-1,0,ScrW()*1.01,ScrH()*1.2)
@@ -351,7 +355,6 @@ hg.Accessories = {
         name = "Bandana colorable"
     },
 
-	-- cs stuff
     ["arctic_balaclava"] = {
         model = "models/d/balaklava/arctic_reference.mdl",
         femmodel = "models/distac/feminine_mask.mdl",
@@ -377,20 +380,6 @@ hg.Accessories = {
         bonemerge = true,
         name = "Phoenix Balaclava"
     },
-   	--[[
-	["hood_balaclava"] = {
-        model = "models/balaclava_hood/balaclava_hood.mdl",
-        femmodel = "models/distac/feminine_mask.mdl",
-        bone = "ValveBiped.Bip01_Head1",
-        malepos = {Vector(-27,-5,0),Angle(180,100,90),1},
-		fempos = {Vector(-0.6,-0.6,0),Angle(180,100,90),0.95},
-        skin = 0,
-        norender = true,
-		placement = "head",
-		vpos = Vector(-45,-45,0),
-        name = "Hood Balaclava"
-    },
-	]]
     ["terrorist_band"] = {
         model = "models/distac/band_team.mdl",
         femmodel = "models/distac/band_team_f.mdl",
@@ -404,7 +393,6 @@ hg.Accessories = {
         flex = true,
         name = "Terrorist Armband"
     },
-
     -- scarfs
     ["white scarf"] = {
         model = "models/sal/acc/fix/scarf01.mdl",
@@ -839,7 +827,7 @@ hg.Accessories = {
         bPointShop = true,
         price = 2500,
         vpos = Vector(0,0,69),
-        name = "ОЧКИ С УСАМИ МЕМ"
+        name = "Mustache Glasses"
     },
 
     ["glasses fmf"] = {
@@ -1102,40 +1090,40 @@ hg.Accessories = {
         vpos = Vector(0,0,69),
         name = "MF Doom Mask"
     },
-    -- ["anon mask"] = {
-    --     model = "models/rawjesus/wear/anon.mdl",
-    --     femmodel = "models/rawjesus/wear/anon.mdl",
-    --     bone = "ValveBiped.Bip01_Head1",
-    --     malepos = {Vector(0,-0.8,0),Angle(180,100,90),1},
-    --     fempos = {Vector(-1.2,-0.8,0),Angle(180,100,90),1},
-    --     skin = 0,
-    --     placement = "face",
-    --     norender = true,
-    --     bonemerge = true,
-    --     bPointShop = true,
-    --     price = 6500,
-    --     vpos = Vector(0,0,0),
-    --     name = "Anonymous Mask"
-    -- },
-    -- ["hockey mask"] = {
-    --     model = "models/rawjesus/wear/jason.mdl",
-    --     femmodel = "models/rawjesus/wear/jason.mdl",
-    --     bone = "ValveBiped.Bip01_Head1",
-    --     malepos = {Vector(0.5,-0.8,0),Angle(180,100,90),1},
-    --     fempos = {Vector(-0.5,-0.8,0),Angle(180,100,90),1},
-    --     skin = 0,
-    --     placement = "face",
-    --     norender = true,
-    --     bonemerge = true,
-    --     bPointShop = true,
-    --     price = 7500,
-    --     vpos = Vector(0,0,0),
-    --     name = "Hockey Mask"
-    -- },
+    ["anon mask"] = {
+        model = "models/rawjesus/wear/anon.mdl",
+        femmodel = "models/rawjesus/wear/anon.mdl",
+        bone = "ValveBiped.Bip01_Head1",
+        malepos = {Vector(0,-0.8,0),Angle(180,100,90),1},
+        fempos = {Vector(-1.2,-0.8,0),Angle(180,100,90),1},
+        skin = 0,
+        placement = "face",
+        norender = true,
+        bonemerge = true,
+        bPointShop = true,
+        price = 6500,
+        vpos = Vector(0,0,0),
+        name = "Anonymous Mask"
+    },
+    ["hockey mask"] = {
+        model = "models/rawjesus/wear/jason.mdl",
+        femmodel = "models/rawjesus/wear/jason.mdl",
+        bone = "ValveBiped.Bip01_Head1",
+        malepos = {Vector(0.5,-0.8,0),Angle(180,100,90),1},
+        fempos = {Vector(-0.5,-0.8,0),Angle(180,100,90),1},
+        skin = 0,
+        placement = "face",
+        norender = true,
+        bonemerge = true,
+        bPointShop = true,
+        price = 7500,
+        vpos = Vector(0,0,0),
+        name = "Hockey Mask"
+    },
 
     ["hood"] = {
         model = "models/distac/kapishon2.mdl",
-        femmodel = "models/distac/kapishon2_f.mdl",
+        femmodel = "models/distac/kapishon2.mdl",
         bone = "ValveBiped.Bip01_Head1",
         malepos = {Vector(0.2,4.8,0),Angle(0,90,90),1},
         fempos = {Vector(-1.2,3.5,0),Angle(0,90,90),1},
@@ -1198,7 +1186,7 @@ hg.Accessories = {
         name = "Nurse Cap"
     },
 
-	["cap payot"] = {
+    ["cap payot"] = {
         model = "models/grinchfox/head_wear/jewhat.mdl",
         bone = "ValveBiped.Bip01_Head1",
         malepos = {Vector(1,0.4,0),Angle(0,-95,-90),1},
@@ -1214,7 +1202,7 @@ hg.Accessories = {
         name = "Payot Cap"
     },
 
-	["burger king crown"] = {
+    ["burger king crown"] = {
         model = "models/roblox_assets/burger_king_crown.mdl",
         bone = "ValveBiped.Bip01_Head1",
         malepos = {Vector(7.8,-0.1,0),Angle(-90,-80,-90),0.7},
@@ -1225,7 +1213,8 @@ hg.Accessories = {
         bonemerge = true,
         bSetColor = false,
         bPointShop = true,
-        price = 99999999, -- не должно быть видно в поинтшопе типо нельзя купить (пасхалка)
+        isdpoint = true,
+        price = 5,
         vpos = Vector(0,0,5),
         name = "Burger King Crown"
     },
@@ -1243,7 +1232,7 @@ hg.Accessories = {
         bPointShop = true,
         price = 7331,
         vpos = Vector(0,0,5),
-        name = "DealGlasses™"
+        name = "DealGlasses"
     },
 
     ["cool glasses"] = {
@@ -1505,19 +1494,29 @@ hg.Accessories = {
     },
 }
 
-hook.Add("Think","RemoveME",function()
-    hg.PointShop = hg.PointShop or {}
+hook.Add("ZPointshopLoaded","LoadAccessories",function()
+    -- AUTO-NAPRAWA: Sprawdź obie wersje nazwy (PointShop vs Pointshop)
+    local PLUGIN = hg.PointShop or hg.Pointshop
 
-    local PLUGIN = hg.PointShop
+    if not PLUGIN then
+        print("[Z-CITY ERROR] Критическая ошибка: таблица PointShop не найдена.!")
+        return
+    end
 
-    PLUGIN.Items = {}
+    -- Upewnij się, że funkcja CreateItem istnieje
+    if not PLUGIN.CreateItem then
+        print("[Z-CITY ERROR] Таблица PointShop существует, но функция CreateItem отсутствует.!")
+        return
+    end
+
+    PLUGIN.Items = PLUGIN.Items or {}
 
     for k, acces in pairs(hg.Accessories) do
         if not acces.bPointShop then continue end
-
+        
+        -- Wywołanie funkcji (teraz bezpieczne)
         PLUGIN:CreateItem( k, string.NiceName( acces.name or k ), acces.model, acces.bodygroups, acces.skin, acces.vpos or Vector(0,0,0), acces.price, acces.isdpoint, {[0] = acces.SubMat} )
     end
-
-    hook.Remove( "Think", "RemoveME" )
+    
+    print("[Z-CITY] Аксессуары успешно загружены!")
 end)
-

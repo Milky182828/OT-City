@@ -9,13 +9,13 @@ SWEP.Category = "Weapons - Shotguns"
 SWEP.Slot = 2
 SWEP.SlotPos = 10
 SWEP.ViewModel = ""
-SWEP.WorldModel = "models/weapons/w_shot_xm1014.mdl"
+SWEP.WorldModel = "models/weapons/tfa_ins2/w_m1014.mdl"
 SWEP.ReloadSound = "weapons/tfa_ins2/m1014/toz_shell_insert_2.wav"
 SWEP.WepSelectIcon2 = Material("pwb/sprites/xm1014.png")
 SWEP.IconOverride = "entities/weapon_pwb_xm1014.png"
-SWEP.WorldModelFake = "models/weapons/arccw/c_ud_m1014.mdl"
-
-
+SWEP.WorldModelFake = "models/weapons/arccw/c_ud_m1014.mdl" -- ОЧЕНЬ странная проблема с модельками глеба, работать начинают только если ты включишь камеру на игрока, возможно проблема в рендероверайде...
+//SWEP.FakeScale = 1.5
+--PrintAnims(Entity(1):GetActiveWeapon():GetWM())
 --PrintTable(Entity(1):GetActiveWeapon():GetWM():GetAttachments())
 --uncomment for funny
 SWEP.FakePos = Vector(-10, 3.035, 3.45)
@@ -25,7 +25,9 @@ SWEP.FakeAttachment = "1"
 SWEP.AttachmentPos = Vector(-5,-0.05,0.7)
 SWEP.AttachmentAng = Angle(0,0,-90)
 SWEP.FakeBodyGroups = "000000002"
-
+//SWEP.MagIndex = 6
+//MagazineSwap
+--Entity(1):GetActiveWeapon():GetWM():AddLayeredSequence(Entity(1):GetActiveWeapon():GetWM():LookupSequence("delta_foregrip"),1)
 SWEP.FakeEjectBrassATT = "2"
 SWEP.FakeViewBobBone = "CAM_Homefield"
 SWEP.FakeReloadSounds = {
@@ -33,16 +35,16 @@ SWEP.FakeReloadSounds = {
 	[0.34] = "weapons/ak74/ak74_magout_rattle.wav",
 	[0.85] = "weapons/ak74/ak74_magin.wav",
 	[0.95] = "weapons/universal/uni_crawl_l_05.wav",
-
+	--[0.95] = "weapons/ak74/ak74_boltback.wav"
 }
 
 SWEP.FakeEmptyReloadSounds = {
-
+	--[0.22] = "weapons/ak74/ak74_magrelease.wav",
 	[0.25] = "weapons/ak74/ak74_magout.wav",
 	[0.34] = "weapons/ak74/ak74_magout_rattle.wav",
 	[0.65] = "weapons/ak74/ak74_magin.wav",
 	[0.75] = "weapons/universal/uni_crawl_l_05.wav",
-
+	--[0.95] = "weapons/ak74/ak74_boltback.wav",
 	[0.91] = "weapons/ak74/ak74_boltback.wav",
 	[0.96] = "weapons/ak74/ak74_boltrelease.wav",
 }
@@ -215,26 +217,38 @@ SWEP.GunCamAng = Angle(190,-5,-95)
 
 local vector_full = Vector(1,1,1)
 
+local function hgSafeWM(self)
+	if not self or not self.GetWM then return nil end
+	local wm = self:GetWM()
+	if isbool(wm) then return nil end
+	if not IsValid(wm) then return nil end
+	return wm
+end
+
 local function reloadFunc(self)
 	if not SERVER then return end
 	
 	self:SetNetVar("shootgunReload",CurTime() + 1.1)
 
-	self:GetWM():ManipulateBoneScale(47, vector_full)
-	--self:GetOwner():PullLHTowards("ValveBiped.Bip01_Spine2", 0.58)
+	local wm = hgSafeWM(self)
+	if wm then
+		wm:ManipulateBoneScale(47, vector_full)
+	end
 
 	self:PlayAnim(self.AnimList["insert"] or "sgreload_insert", 1, false, function() 
-		self:InsertAmmo(1) 
-		self:GetWM():ManipulateBoneScale(47, vector_origin)
+		self:InsertAmmo(1)
+
+		local wm2 = hgSafeWM(self)
+		if wm2 then
+			wm2:ManipulateBoneScale(47, vector_origin)
+		end
 		
 		local key = hg.KeyDown(self:GetOwner(), IN_RELOAD)
-		--print("reload",key)
 		
 		if key and self:CanReload() then
 			reloadFunc(self)
 			return
 		end
-
 
 		self:PlayAnim(self.AnimList["finish"] or "sgreload_finish", 1,false,function(self) self:SetNetVar("shootgunReload",0) end,false,true) 
 	end, false, true)
@@ -283,23 +297,26 @@ SWEP.AnimsEvents = {
 	["sgreload_start_empty"] = {
 		[0.2] = function(self)
 			self:EmitSound("weapons/arccw_ud/m1014/breechload.ogg")
-			self:GetWM():ManipulateBoneScale(47, vector_full)
+			local wm = hgSafeWM(self)
+			if wm then wm:ManipulateBoneScale(47, vector_full) end
 		end,
 		[0.8] = function(self)
 			self:EmitSound("weapons/arccw_ud/m1014/breechclose.ogg")
 		end,
 		[0.9] = function(self)
-			self:GetWM():ManipulateBoneScale(47, vector_origin)
+			local wm = hgSafeWM(self)
+			if wm then wm:ManipulateBoneScale(47, vector_origin) end
 		end,
 	},
 	["sgreload_insert"] = {
 		[0.0] = function(self)
 			self:EmitSound("weapons/arccw_ud/m1014/shell-insert-0"..math.random(1,3)..".ogg")
-			--
-			self:GetWM():ManipulateBoneScale(47, vector_full)
+			local wm = hgSafeWM(self)
+			if wm then wm:ManipulateBoneScale(47, vector_full) end
 		end,
 		[0.8] = function(self)
-			self:GetWM():ManipulateBoneScale(47, vector_origin)
+			local wm = hgSafeWM(self)
+			if wm then wm:ManipulateBoneScale(47, vector_origin) end
 		end,
 	}
 }

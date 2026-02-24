@@ -2,7 +2,7 @@ local PANEL = {}
 
 local sw, sh = ScrW(), ScrH()
 
-local text = "There's an unknown pathowogen virus ravaging your current area. Your location is now under immediate quarantine until further notice, we'll try to figure out the means of your extraction in the meantime."
+local text = "В вашем регионе распространен неизвестный патогенный вирус. В настоящее время в вашем регионе объявлен карантин до дальнейшего уведомления, а мы тем временем попытаемся найти способ вашего эвакуации."
 
 local COMMANDER = Material("zbattle/FURMANDER.png", "smooth")
 

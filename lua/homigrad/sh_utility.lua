@@ -1001,7 +1001,7 @@ local IsValid = IsValid
 		if !self.shouldTransmit then return end
 
 		ent = IsValid(ent) and ent or self
-		if ent:GetMaterial() == "NULL" then ent:DrawShadow( false ) return end
+
 		if not IsValid(ent) then return end
 
 		--local drawornot = hook_Run("PreDrawPlayer2", ent, self) // true means nodraw
@@ -1009,7 +1009,6 @@ local IsValid = IsValid
 
 		DrawPlayerRagdoll(ent, self)
 		RenderAccessoriesCool(ent, self)
-		hook_Run("CoolPostDrawAppearance", ent, self)
 		//hg.HomigradBones(self, CurTime(), FrameTime())
 
 		if IsValid(self.OldRagdoll) then DrawAppearance(ent, self, true) end
@@ -2142,24 +2141,16 @@ local IsValid = IsValid
 			rag.inventory.Weapons = {}
 
 			for k, wep in pairs(loot) do
-				local weapon = weapons.Get(wep)
-				if rag.inventory.Weapons and rag.inventory.Weapons[wep] then return end
-				rag.inventory.Weapons = rag.inventory.Weapons or {}
-				rag.inventory.Weapons[wep] = weapon and weapon.GetInfo and weapon:GetInfo() or true
+				rag.inventory.Weapons[wep] = {}
 				rag:SetNetVar("Inventory", rag.inventory)
-			end
-
-			rag:SetNWString("PlayerName", nameNPCs[ent:GetClass()][1])
-			rag:SetNWVector("PlayerColor", nameNPCs[ent:GetClass()][2])
-			rag.GetPlayerName = function()
-				return nameNPCs[ent:GetClass()][1]
+				rag:SetNWString("PlayerName", nameNPCs[ent:GetClass()][1])
+				rag:SetNWVector("PlayerColor", nameNPCs[ent:GetClass()][2])
+				rag.GetPlayerName = function()
+					return nameNPCs[ent:GetClass()][1]
+				end
 			end
 		end
 	end)
-
-	if SERVER then --// Force enable npc serverside ragdolls
-		RunConsoleCommand("ai_serverragdolls", "1")
-	end
 --//
 --\\ Disable drive
 	--[[hook.Add("StartEntityDriving", "disabledriving", function(ent, ply)
@@ -2494,8 +2485,8 @@ local IsValid = IsValid
 			if PhysObj and PhysObj.GetMass and PhysObj:GetMass() > 14 then return false end
 		end
 
-		--if IsValid(ply.FakeRagdoll) then return false end
-		if ply.PickUpCooldown > CurTime() and not IsValid(ply.FakeRagdoll) then return false end
+		if IsValid(ply.FakeRagdoll) then return false end
+		if ply.PickUpCooldown > CurTime() then return false end
 
 		ply.PickUpCooldown = CurTime() + 0.15
 	end)
@@ -2601,16 +2592,15 @@ duplicator.Allow( "homigrad_base" )
 		["grenade"] = true
 	}
 
-	hook.Add( "CalcMainActivity", "RunningAnim", function(ply, vel)
-		local wep = IsValid(ply:GetActiveWeapon()) and ply:GetActiveWeapon()
-		local isAmputated = ply:IsBerserk() and ply.organism and (ply.organism.llegamputated or ply.organism.rlegamputated)
-		if (not ply:InVehicle()) and ply:IsOnGround() and vel:Length() > 250 and wep and runHoldTypes[wep:GetHoldType()] and not isAmputated then
-			local isFurry = ply.PlayerClassName == "furry"
+	hook.Add( "CalcMainActivity", "RunningAnim", function( Player, Velocity )
+		local wep = IsValid(Player:GetActiveWeapon()) and Player:GetActiveWeapon()
+		if (not Player:InVehicle()) and Player:IsOnGround() and Velocity:Length() > 250 and wep and runHoldTypes[wep:GetHoldType()] then
+			local isFurry = Player.PlayerClassName == "furry"
 			local anim = ACT_HL2MP_RUN_FAST
-			if ply:IsOnFire() then
+			if Player:IsOnFire() then
 				anim = ACT_HL2MP_RUN_PANICKED
 			elseif isFurry then
-				if hg.KeyDown(ply, IN_WALK) and not hg.KeyDown(ply, IN_BACK) then
+				if hg.KeyDown(Player, IN_WALK) and not hg.KeyDown(Player, IN_BACK) then
 					anim = ACT_HL2MP_RUN_ZOMBIE_FAST
 				else
 					anim = ACT_HL2MP_RUN_FAST
@@ -2619,14 +2609,6 @@ duplicator.Allow( "homigrad_base" )
 				anim = ACT_HL2MP_RUN_FAST
 			end
 
-			return anim, -1
-		end
-
-		if (not ply:InVehicle()) and ply:IsOnGround() and isAmputated then
-			local anim = ACT_HL2MP_WALK_ZOMBIE_06
-			if vel:Length() > 250 then
-				anim = ACT_HL2MP_RUN_ZOMBIE_FAST
-			end
 			return anim, -1
 		end
 	end)

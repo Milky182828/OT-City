@@ -2,9 +2,9 @@
 local PANEL = {}
 
 local Statics = {
-    {"Kills", "Kills"},
-    {"Suicides", "Suicides"},
-    {"Deaths", "Deaths"},
+    {"Убийства", "Kills"},
+    {"Суицид", "Suicides"},
+    {"Смертей", "Deaths"},
     --{"Victories being a traitor", "zb_hmcd_t_wins"},
    -- {"Neutralizings a traitor", "zb_hmcd_ino_t_kills"}
 }
@@ -26,7 +26,7 @@ function PANEL:Init()
     self.StatPanel = panel1
     function panel1:Paint() end
 
-    SInfo:AddSheet( "Statistics", panel1, "icon16/chart_bar.png" )
+    SInfo:AddSheet( "Статистика", panel1, "icon16/chart_bar.png" )
 
     --local panel1 = vgui.Create( "DPanel", SInfo )
     --function panel1:Paint() end
@@ -69,11 +69,11 @@ BlurBackground = hg.DrawBlur
 
 local function PaintFrame(self,w,h)
 	BlurBackground(self)
-    surface.SetDrawColor(155, 0, 0, 155)
+    surface.SetDrawColor(4, 228, 34, 155)
     surface.SetMaterial(gradient_d)
     surface.DrawTexturedRect( 0, 0, w, h )
 
-	surface.SetDrawColor( 255, 0, 0, 128)
+	surface.SetDrawColor( 14, 151, 55, 128)
     surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 end
 

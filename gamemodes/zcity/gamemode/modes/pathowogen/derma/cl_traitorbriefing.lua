@@ -13,10 +13,10 @@ function PANEL:Init()
     self.dialogue = self:Add("ZB_DialogueTraitor")
     self.dialogue:SetPos(ScrW() / 2 - self.dialogue:GetWide() / 2, ScrH() / 2 - self.dialogue:GetTall() / 2)
 
-    self.dialogue:SetText("Your objective is simple: eliminate every survivor. You'll have to procure your equipment on-site, and we'll extract you only when your mission is complete.", 2)
+    self.dialogue:SetText("Ваша цель проста: уничтожить всех выживших. Вам придется приобрести снаряжение на месте, и мы заберем вас только после завершения вашей миссии.", 2)
 	timer.Simple(15, function()
 		if !IsValid(self) then return end
-		self.dialogue:SetText("Good luck. Over.")
+		self.dialogue:SetText("Удачи вам. Выдвигайтесь.")
 
 		self:SetKeyboardInputEnabled(false)
 

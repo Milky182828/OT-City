@@ -35,14 +35,14 @@ end)
 
 local teams = {
 	[0] = {
-		objective = "Kill all groove mazafakas",
-		name = "a Bloodz Member",
+		objective = "Убей всех зеленых мазафаков",
+		name = "член банды Bloodz",
 		color1 = Color(180, 0, 0),
 		color2 = Color(180, 0, 0)
 	},
 	[1] = {
-		objective = "Kill all bloodz mazafakas",
-		name = "a Groove Member",
+		objective = "Убей всех крастных мазафаков",
+		name = "член банды Groove",
 		color1 = Color(0, 180, 0),
 		color2 = Color(0, 180, 0)
 	},
@@ -74,11 +74,11 @@ function MODE:HUDPaint()
 		surface.SetFont("timer_Font2")
 		surface.SetDrawColor(255, 255, 255, 255)
 		local w, h = surface.GetTextSize(text)
-		local w2, h2 = surface.GetTextSize("11:11:11 time left before SWAT arrives!")
+		local w2, h2 = surface.GetTextSize("11:11:11 Время до прибытия SWAT!")
 		surface.SetTextPos(sw * 0.5 - w2 / 2, sh * 0.05)
 		surface.DrawText(time)
 		surface.SetTextPos(sw * 0.5 - w2 / 2 + w, sh * 0.05)
-		surface.DrawText("time left before SWAT arrives!")
+		surface.DrawText("Время до прибытия SWAT!")
 		//draw.SimpleText(" left before SWAT arrives!", "timer_Font2", sw * 0.432, sh * 0.05, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 		//draw.SimpleText(time, "timer_Font2", sw * 0.36, sh * 0.05, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 	end
@@ -130,11 +130,11 @@ function MODE:HUDPaint()
 	zb.RemoveFade()
 	local fade = math.Clamp(zb.ROUND_START + 8 - CurTime(), 0, 1)
 	local team_ = lply:Team()
-	draw.SimpleText("ZBattle | Gang Wars", "ZB_HomicideMediumLarge", sw * 0.5, sh * 0.1, Color(0, 162, 255, 255 * fade), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+	draw.SimpleText("ZBattle | Война банд", "ZB_HomicideMediumLarge", sw * 0.5, sh * 0.1, Color(0, 162, 255, 255 * fade), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 	local Rolename = teams[team_].name
 	local ColorRole = teams[team_].color1
 	ColorRole.a = 255 * fade
-	draw.SimpleText("You are " .. Rolename, "ZB_HomicideMediumLarge", sw * 0.5, sh * 0.5, ColorRole, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+	draw.SimpleText("Ты: " .. Rolename, "ZB_HomicideMediumLarge", sw * 0.5, sh * 0.5, ColorRole, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 	local Objective = teams[team_].objective
 	local ColorObj = teams[team_].color2
 	ColorObj.a = 255 * fade
@@ -219,7 +219,7 @@ CreateEndMenu = function()
 		local lengthX, lengthY = surface.GetTextSize("Players:")
 		surface.SetTextPos(w / 2 - lengthX / 2, 20)
 		surface.DrawText("Players:")
-		surface.SetDrawColor(255, 0, 0, 128)
+		surface.SetDrawColor(8, 231, 0, 128)
 		surface.DrawOutlinedRect(0, 0, w, h, 2.5)
 	end
 
@@ -229,7 +229,7 @@ CreateEndMenu = function()
 	DScrollPanel:SetSize(sizeX - 20, sizeY - 90)
 	function DScrollPanel:Paint(w, h)
 		BlurBackground(self)
-		surface.SetDrawColor(255, 0, 0, 128)
+		surface.SetDrawColor(0, 206, 0, 128)
 		surface.DrawOutlinedRect(0, 0, w, h, 2.5)
 	end
 

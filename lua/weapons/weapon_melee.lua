@@ -121,25 +121,19 @@ function SWEP:SetHold(value)
     self.holdtype = value
 end
 
-function SWEP:KeyDown(key)
-	return hg.KeyDown(self:GetOwner(),key)
-end
-
 function SWEP:InUse()
-	local ply = self:GetOwner()
-
-    if !IsValid(ply) then return false end
-    
+    local ply = self:GetOwner()
+    if !IsValid(ply) then return end
     local ent = IsValid(ply.FakeRagdoll) and ply.FakeRagdoll or ply
-	local org = ply.organism
-    
-	local power = ply:GetNWFloat("power", 1)
+    local org = ply.organism
+
+    local power = ply:GetNWFloat("power", 1)
 
 	if power < 0.4 and ent != ply then
 		return false
 	end
-
-	return ( ((not ply.InVehicle || !ply:InVehicle()) and !hg.RagdollCombatInUse(ply)) && self:KeyDown(IN_USE)) || ((ply.InVehicle && ply:InVehicle() or hg.RagdollCombatInUse(ply) or ent == ply) && not self:KeyDown(IN_USE)) || (IsValid(ply.OldRagdoll))
+    
+    return (ent == ply or hg.KeyDown(ply, IN_USE) or IsValid(ply.OldRagdoll))
 end
 
 SWEP.modelscale = 1
@@ -194,7 +188,7 @@ if CLIENT then
 			matrixR:Rotate(npcang)
 
 			if not IsValid(self.NPCworldModel) then
-				self.NPCworldModel = ClientsideModel(self.WorldModelExchange and self.WorldModelExchange or self.WorldModel)
+				self.NPCworldModel = ClientsideModel(self.WorldModel)
 				self:CallOnRemove("remove_npcworldmodel1",function()
 					if IsValid(self.NPCworldModel) then
 						self.NPCworldModel:Remove()
@@ -494,10 +488,6 @@ function SWEP:ModelAnim(model, pos, ang)
 
 	self.timetick2 = SysTime()
 
-    if self.ModelAnimAdd then
-        return self:ModelAnimAdd(model,pos,ang)
-    end
-
     return pos, ang
 end
 
@@ -585,8 +575,8 @@ function SWEP:SetHandPos(noset)
 	if !IsValid(wm) then return end
 	-- ent:SetupBones()
 
-	self.rhandik = self.setrh and IsValid(owner)//self.setrh
-	self.lhandik = self.setlh and IsValid(owner) and (ply:GetTable().ChatGestureWeight < 0.1) and hg.CanUseLeftHand(ply) and !(owner.suiciding and self.SuicideNoLH)
+	self.rhandik = self.setrh and IsValid(owner) and (ent == owner or hg.KeyDown(owner,IN_USE) or (IsValid(ply.OldRagdoll)))//self.setrh
+	self.lhandik = self.setlh and IsValid(owner) and (ent == owner or hg.KeyDown(owner,IN_USE) or (IsValid(ply.OldRagdoll))) and (ply:GetTable().ChatGestureWeight < 0.1) and hg.CanUseLeftHand(ply) and !(owner.suiciding and self.SuicideNoLH)
 
     local rhmat, lhmat = ent:GetBoneMatrix(ent:LookupBone("ValveBiped.Bip01_R_Hand")), ent:GetBoneMatrix(ent:LookupBone("ValveBiped.Bip01_L_Hand"))
 
@@ -892,7 +882,7 @@ end
 function SWEP:BehindAttack(ent)
     local owner = self:GetOwner()
 
-    return self:IsEntSoft(ent) and ent:IsPlayer() and IsValid(owner) and (owner:GetAimVector():Dot(ent:GetAimVector()) > math.cos(math.rad(45)))
+    return self:IsEntSoft(ent) and ent:IsPlayer() and (owner:GetAimVector():Dot(ent:GetAimVector()) > math.cos(math.rad(45)))
 end
 
 function SWEP:PunchPlayer(ent, attacktype, trnormal, dmg)
@@ -930,17 +920,14 @@ end
 
 function SWEP:BlockingLogic(ent, mul, attacktype, trace)
     local ent = hg.RagdollOwner(ent) or ent
-	local owner = self:GetOwner()
 
-	if ent:IsPlayer() and ((istable(self.HitEnts) and !table.HasValue(self.HitEnts, ent)) or owner:IsNPC()) then
+    if ent:IsPlayer() and !table.HasValue(self.HitEnts, ent) then
         local wep = ent:GetActiveWeapon()
+
+        local owner = self:GetOwner()
 
         local pos, aimvec = hg.eye(ent)
         local pos2, aimvec2 = hg.eye(owner)
-
-		if owner:IsNPC() then
-			pos, aimvec, aimvec2 = owner:EyePos(), owner:GetAimVector(), owner:GetAimVector()
-		end
 
         if not aimvec or not aimvec2 then return 1 end
 
@@ -957,9 +944,7 @@ function SWEP:BlockingLogic(ent, mul, attacktype, trace)
             ent.organism.stamina.subadd = ent.organism.stamina.subadd + mul * math.Clamp(selfdmg / dmg, 0.1, 1) * selfdmg * (perfectblock and 0 or 1)
 
             //viewpunch the attacker maybe?
-			if not owner:IsNPC() then
-            	self:PunchPlayer(owner, attacktype, -owner:GetAimVector(), selfdmg / 2)
-			end
+            self:PunchPlayer(owner, attacktype, -owner:GetAimVector(), selfdmg / 2)
             self:PunchPlayer(ent, attacktype, owner:GetAimVector(), selfdmg / 2)
             
             if perfectblock then
@@ -1665,79 +1650,53 @@ function SWEP:CreateFake(ragdoll)
 end
 
 function SWEP:NPCThink()
-    local npc = self:GetOwner()
+    local ent = self:GetOwner()
     self:SetWeaponHoldType("melee")
     
-    if npc:GetClass() == "npc_metropolice" then
+    if ent:GetClass() == "npc_metropolice" then
         self:SetWeaponHoldType("smg")
     end
     
-    --npc:Fire( "GagEnable" )
+    --ent:Fire( "GagEnable" )
     
-    if npc:GetClass() == "npc_citizen" then
-        --npc:Fire( "DisableWeaponPickup" )
+    if ent:GetClass() == "npc_citizen" then
+        --ent:Fire( "DisableWeaponPickup" )
     end
     
-    local enemy = npc:GetEnemy()
+    local enemy = ent:GetEnemy()
     if not enemy then return end
 
-    local dist = enemy:GetPos():Distance(npc:GetPos())
+    local dist = enemy:GetPos():Distance(ent:GetPos())
 
     if enemy and dist > 85 then
-        --npc:SetSchedule(SCHED_CHASE_ENEMY)
+        --ent:SetSchedule(SCHED_CHASE_ENEMY)
     end
 
     if dist < 85 and (self.LastNPCAttack or 0) < CurTime() then
-		local timerId = (self:EntIndex() .. "_NPCAttack")
-		if timer.Exists(timerId) then return end
-
         local dmg = math.random(self.DamagePrimary - 3, self.DamagePrimary + 3)
         
         local tr = {}
-        tr.start = npc:EyePos()
+        tr.start = ent:EyePos()
         tr.endpos = enemy.EyePos and enemy:EyePos() or enemy:GetPos()
-        tr.filter = npc
+        tr.filter = ent
 
         local trace = util.TraceLine(tr)
-		--  trace.Entity == ((enemy:IsPlayer() and IsValid(enemy.FakeRagdoll) and (enemy.organism and not enemy.organism.otrib)) and enemy.FakeRagdoll or enemy)
-        local trEnt = IsValid(trace.Entity) and trace.Entity
-		if IsValid(trEnt) then
-			self.LastNPCAttack = CurTime() + (self.AnimTime1 or 1)
-			npc:EmitSound(self.AttackSwing, 70)
 
-            npc:SetSchedule(SCHED_MELEE_ATTACK1)
-			timer.Create(timerId, (self.AttackTime + 0.1) or 0.4, 1, function()
-				if IsValid(self) and IsValid(npc) and npc:Alive() and IsValid(trEnt) then
-					local mul = 1
-					mul = mul * (self:BehindAttack(trEnt) and 2 or 1)
-					mul = mul * self:BlockingLogic(trEnt, mul, false, trace)
-					trEnt:PrecacheGibs()
+        if IsValid(trace.Entity) and trace.Entity == enemy then
+            self.LastNPCAttack = CurTime() + self.AnimTime1
+			ent:EmitSound(self.AttackSwing, 70)
 
-					dmg = dmg * mul
-					local dmginfo = DamageInfo()
-					dmginfo:SetAttacker(npc)
-					dmginfo:SetInflictor(self)
-					dmginfo:SetDamage(dmg)
-					dmginfo:SetDamageForce(trace.Normal * dmg * 1)
-					dmginfo:SetDamageType(self.DamageType)
-					dmginfo:SetDamagePosition(trace.HitPos)
-					trEnt:TakeDamageInfo(dmginfo)
-					npc:EmitSound(self.AttackHitFlesh, 60)
+            ent:SetSchedule(SCHED_MELEE_ATTACK1)
 
-					if trEnt:IsPlayer() then
-						hg.AddForceRag(trEnt, trace.PhysicsBone or 0, trace.Normal * math.min(dmg, 25) * 400, 0.5)
-
-						self:PunchPlayer(trEnt, false, trace.Normal, dmg)
-		
-						local phys = trEnt:GetPhysicsObjectNum(trace.PhysicsBone or 0)
-		
-						if IsValid(phys) then
-							phys:ApplyForceOffset(trace.Normal * math.min(dmg, 25) * 400, trace.HitPos)
-						end
-					end
-				end
-				if timer.Exists(timerId) then timer.Remove(timerId) end
-			end)
+            local dmginfo = DamageInfo()
+            dmginfo:SetAttacker(ent)
+            dmginfo:SetInflictor(self)
+            dmginfo:SetDamage(dmg)
+            dmginfo:SetDamageForce(trace.Normal * dmg * 1)
+            dmginfo:SetDamageType(self.DamageType)
+            dmginfo:SetDamagePosition(trace.HitPos)
+            trace.Entity:TakeDamageInfo(dmginfo)
+			ent:EmitSound(self.AttackHitFlesh, 60)
         end
     end
 end
@@ -1920,9 +1879,6 @@ function SWEP:SetupWeaponHoldTypeForAI( t )
 	end
 end
 
-function SWEP:CanBePickedUpByNPCs()
-	return true
-end
 
 --[[function SWEP:CustomAttack2() -- prikol
     local ent = ents.Create("ent_throwable")

@@ -15,7 +15,7 @@ function MODE.DisplayOrganismInfo(organism, ply)
 end
 
 --\\
-hook.Add("HG_PlayerFootstep_Notify", "HMCD_Professions_Abilities", function(ply, pos, foot, snd, volume, filter)
+hook.Add("PlayerFootstep", "HMCD_Professions_Abilities", function(ply, pos, foot, snd, volume, filter)
 	ply.ProfessionAbility_FootstepsAmt = ply.ProfessionAbility_FootstepsAmt or 0
 	ply.ProfessionAbility_FootstepsAmt = ply.ProfessionAbility_FootstepsAmt + 1
 	
@@ -27,10 +27,16 @@ hook.Add("HG_PlayerFootstep_Notify", "HMCD_Professions_Abilities", function(ply,
 			net.WriteFloat(ply:EyeAngles().y)
 			net.WriteBool(foot == 0)
 			
-			local character_color = ply:GetNWVector("PlayerColor")
+			local appearance = ply.Appearance
+			
+			if(!appearance)then
+				appearance = GetRandomAppearance(ply)
+			end
+			
+			local character_color = Appearance.AColor or color_white
 			
 			if(!IsColor(character_color))then
-				character_color = Color(character_color[1] * 255, character_color[2] * 255, character_color[3] * 255)
+				character_color = Color(character_color.r, character_color.g, character_color.b)	--; WARNING CONFIRM
 			end
 			
 			net.WriteColor(character_color, false)
@@ -107,7 +113,7 @@ concommand.Add("hg_create_molotov", function(ply)
 		local have_bottle = ply:HasWeapon("weapon_hg_bottle")
 
 		for i, ent in ipairs(ents.FindInSphere(ply:GetPos(), 64)) do
-			if hg.gas_models[ent:GetModel()] and !ent:GetNWBool("EmptyBarrel", false) then
+			if hg.gas_models[ent:GetModel()] then
 				have_barrel_nearby = true
 				break
 			end

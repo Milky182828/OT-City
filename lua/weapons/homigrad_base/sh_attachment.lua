@@ -3,7 +3,7 @@ local angFull = Angle(-30, 30, 30)
 local angZero = Angle(0, 0, 0)
 hg.attachments = hg.attachments or {}
 SWEP.availableAttachments = {}
-local hg_random_atts = ConVarExists("hg_random_atts") and GetConVar("hg_random_atts") or CreateConVar("hg_random_atts", 0, FCVAR_SERVER_CAN_EXECUTE, "Toggle random attachments on weapon spawn", 0, 1)
+local hg_random_atts = ConVarExists("hg_random_atts") and GetConVar("hg_random_atts") or CreateConVar("hg_random_atts", 0, FCVAR_SERVER_CAN_EXECUTE, "", 0, 1)
 function SWEP:ClearAttachments()
 	self.attachments = {
 		barrel = {},
@@ -695,10 +695,7 @@ if CLIENT then
 	local function refreshtbl()
 		local tblcpy = {}
 
-		local inv = lply:GetNetVar("Inventory")
-		if inv == nil then return end
-
-		local tbl = inv["Attachments"]
+		local tbl = lply:GetNetVar("Inventory")["Attachments"]
 		local wep = lply:GetActiveWeapon()
 		local achtbl = {}
 		if IsValid(wep) and ishgweapon(wep) then
@@ -731,7 +728,6 @@ if CLIENT then
 	end)
 
 	local mat = Material("homigrad/vgui/gradient_left.png")
-	local clr_blackalpha = Color(0, 0, 0, 100)
 
 	CreateMenu = function()
 		if IsValid(hg.attachmentsMenuPanel) then
@@ -776,7 +772,7 @@ if CLIENT then
 		sbar:SetHideButtons(true)
 
 		function sbar:Paint(w, h)
-			draw.RoundedBox(0, 0, 0, w, h, clr_blackalpha)
+			draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 100))
 		end
 
 		function sbar.btnGrip:Paint(w, h)
@@ -804,14 +800,12 @@ if CLIENT then
 				if !hg.attachmentslaunguage[v[1]] then continue end
 				local but = vgui.Create("DButton")
 				but:SetText( hg.attachmentslaunguage[v[1]]..(v[2] and " - on the weapon" or "") )
-				but:SetFont("ZCity_Tiny")
 				but:Dock( TOP )
 				but:DockMargin( 0, 0, 0, 5 )
 				but:SetSize(0, ScreenScaleH(20))
 
 				local but2 = vgui.Create("DButton", but)
 				but2:SetText( "Drop" )
-				but2:SetFont("ZCity_SuperTiny")
 				but2:Dock( RIGHT )
 
 				but2.Paint = function(self, w, h)

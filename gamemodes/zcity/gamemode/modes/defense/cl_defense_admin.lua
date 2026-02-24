@@ -85,25 +85,24 @@ function CreateAdminWaveMenu(subMode, currentWave, totalWaves, isActive)
     
     adminWaveMenu.Paint = function(self, w, h)
         DrawBackgroundBlur(self)
-        
+
         surface.SetDrawColor(ADMIN_MENU.PRIMARY_COLOR)
         surface.DrawRect(0, 0, w, 50)
-        
+
         surface.SetDrawColor(ADMIN_MENU.BACKGROUND_COLOR)
         surface.DrawRect(0, 50, w, h - 50)
-        
+
         surface.SetDrawColor(ADMIN_MENU.PRIMARY_COLOR)
         surface.DrawOutlinedRect(0, 0, w, h, 2)
-        
-        draw.SimpleText("DEBUG", "Defense_AdminTitle", w/2, 25, ADMIN_MENU.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-        
 
-        local status = isActive and "Active" or "Prepare"
-        draw.SimpleText("Wave now: " .. currentWave .. " / " .. totalWaves, "Defense_AdminText", w/2, 70, ADMIN_MENU.TEXT_COLOR, TEXT_ALIGN_CENTER)
-        draw.SimpleText("Sub-Mode: " .. subMode, "Defense_AdminText", w/2, 95, ADMIN_MENU.TEXT_COLOR, TEXT_ALIGN_CENTER)
-        draw.SimpleText("Status: " .. status, "Defense_AdminText", w/2, 120, ADMIN_MENU.TEXT_COLOR, TEXT_ALIGN_CENTER)
+        draw.SimpleText("ОТЛАДКА", "Defense_AdminTitle", w/2, 25, ADMIN_MENU.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+
+
+        local status = isActive and "Активна" or "Подготовка"
+        draw.SimpleText("Текущая волна: " .. currentWave .. " / " .. totalWaves, "Defense_AdminText", w/2, 70, ADMIN_MENU.TEXT_COLOR, TEXT_ALIGN_CENTER)
+        draw.SimpleText("Подрежим: " .. subMode, "Defense_AdminText", w/2, 95, ADMIN_MENU.TEXT_COLOR, TEXT_ALIGN_CENTER)
+        draw.SimpleText("Статус: " .. status, "Defense_AdminText", w/2, 120, ADMIN_MENU.TEXT_COLOR, TEXT_ALIGN_CENTER)
     end
-    
 
     local waveScroll = vgui.Create("DScrollPanel", adminWaveMenu)
     waveScroll:SetSize(ADMIN_MENU.PANEL_WIDTH - 40, ADMIN_MENU.PANEL_HEIGHT - 180)

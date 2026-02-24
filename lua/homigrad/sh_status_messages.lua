@@ -1,274 +1,222 @@
 
 local allowedchars = {
-	"ah",
-	"AH",
-	"ghh",
-	"GH",
-	"AHHH",
+	"ах",
+	"АХ",
+	"грр",
+	"ГХ",
+	"ААААХ",
 }
 
 local audible_pain = {
-	"AAAAAGH..FUCK.. IT HURTS.",
-	"I CAN'T TAKE THIS ANYMORE!",
-    "Make it STOP make it STOP MAKE IT STOP",
-    "Why won't IT STOP",
-    "Make me unconscious. PLEASE",
-    "Why was I born to feel this why...",
-    "I'd do anything for it to stop... ANYTHING.",
-    "This isn't living this is being TORTURED",
-    "I don't care anymore just STOP the PAIN",
-    "Nothing matters EXCEPT MAKING IT STOP...",
-    "Every second is an eternity of FIRE.",
-    "DEATH WOULD BE MERCY NOW...",
-    "Just one moment without the pain..",
-	"I WISH I HAD SOME PAINKILLERS NOW. FUCK.",
+"ААААА... ЧЕРТ... ЭТО БОЛЬНО",
+"Я БОЛЬШЕ НЕ МОГУ ЭТОГО ВЫНОСИТЬ!",
+"Останови это, ОСТАНОВИ это, ОСТАНОВИ ЭТО!!",
+"Почему ЭТО не ПРЕКРАТИТСЯ!?",
+"Я теряю сознание. ПОЖАЛУЙСТА...",
+"Почему я родился, чтобы чувствовать это, почему...",
+"Я бы сделал все, чтобы это прекратилось... ЧТО УГОДНО",
+"Это не жизнь, это ПЫТКА,СУКА!",
+"Мне уже все равно, просто ПРЕКРАТИ БОЛЬ,ИЗБАВЬ МЕНЯ ОТ МУЧЕНИЙ!",
+"Ничто не имеет значения, КРОМЕ КАК ОСТАНОВИТЬ ЕЕ...",
+"Каждая секунда - это огненная вечность...",
+"СМЕРТЬ БЫЛА БЫ МИЛОСЕРДИЕМ ДЛЯ МЕНЯ...",
+"Всего одно мгновение без боли...",
+"ЖАЛЬ, ЧТО У МЕНЯ СЕЙЧАС НЕТ ОБЕЗБОЛИВАЮЩЕГО. БЛЯТЬ.",
 }
 
 local sharp_pain = {
-	"AAAHH",
-	"AAAH",
-	"AAaaAH",
-	"AAaaAH",
-	"AAaaAAAGH",
-	"AAaaAH",
-	"AAaAaaH",
-	"AAAAAaaH",
-	"AAaaAHHHH",
+	"АААХХХ",
+	"АААХ",
+	"ААааХХ",
+	"ААааХХхх",
+	"АААаааГГРх",
+	"ААаааАХХХ",
+	"АААХХХ",
+	"AAAAAaaх",
+	"AAaaAХХХХ",
 	"AAaAA",
 	"AAAAAa",
-	"AAAAaAAAaaaaghh",
+	"AAAAaAAAaaaaгхх",
 	"AAAaaAa",
-	"AaaAAaghf",
-	"aaAaaAaff",
-	"aaahhh",
-	"AAAaaGHHH",
-	"AAAaaAAHH",
-	"AAAaaAAAAAaGHHHH",
-	"AAAaaAAAAAaGHAAAHHH",
-	"AAAaaAAAAAaGHHAAAAAAHH",
-	"AAAaaAAAAAaGHHHH",
-	"AAAaaAAAaaAAAaGHHHH",
-	"AAAaaAAAaaAAAaAAAAAAAGHHHH",
-	"AAAaaAAAAAaGHHHH",
-	"AAAaaAAAAAAAAAHHH",
-	"AAAaaAAAAAaGHAaaaHH",
-	"AAAaaAAAAAaAaaaaaAAAAHH",
-	"AAAaaAAAAAaAAAAAAAADGHHHH",
-	"AAAaaAAAaaAAAaAAAAAAAAAAAAGGGGGGAGHHHH",
-	"AAAaaAAAaaAAAaAAAAAAAAAAAAAAAAAAH",
+	"AaaAAaгхх",
+	"aaAaaAaхх",
+	"aaaххх",
+	"AAAaaГХХХ",
+	"AAAaaAAхх",
+	"AAAaaAAAAAaГХХХХ",
+	"AAAaaAAAAAaГХAAAХХХ",
+	"AAAaaAAAAAaГХХAAAAAAХХ",
+	"AAAaaAAAAAaГХХХХХ",
+	"AAAaaAAAaaAAAaГХХХРГХХ",
+	"AAAaaAAAaaAAAaAAAAAAAГРХХХ",
+	"AAAaaAAAAAaГХХГРХХХХ",
+	"AAAaaAAAAAAAAAххх",
+	"AAAaaAAAAAaГРХAaaaхх",
+	"AAAaaAAAAAaAaaaaaAAAAHХХ",
+	"AAAaaAAAAAaAAAAAAAAаГРРРХХ",
+	"AAAaaAAAaaAAAaAAAAAAAAAAAAАААХХГГГРХХХ",
+	"AAAaaAAAaaAAAaAAAAAAAAAAAAAAAAAAхх",
 }
 
 hg.sharp_pain = sharp_pain
 
 local random_phrase = {
-	"It's kinda chilly in here...",
-	"Everything seems too quiet...",
-	"Breathing feels oddly satisfying right now.",
-	"What if this quiet lasts forever?",
-	"Why isn't anything happening?",
+"Здесь как-то чилово что-ли...",
+"Все кажется слишком тихим...",
+"Дышать сейчас странно приятно",
+"Что, если эта тишина продлится вечно?",
+"Почему ничего не происходит?",
 }
 
 local fear_hurt_ironic = {
-	"I bet there's a lesson in this... if I survive.",
-	"My future biographer won't believe this part.",
-	"Well, this is a stupid way to go.",
-	"At least my life wasn't boring.",
-	"Note to self: Never do this again.",
-	"This isn't the worst day to die.",
+"Бьюсь об заклад, в этом есть урок... если я выживу",
+"Мой будущий биограф в это не поверит",
+"Что ж, я достоин премии Дарвина",
+"По крайней мере, моя жизнь не была скучной",
+"Заметка для себя: никогда так не поступай, снова",
+"Это не самый худший день для смерти",
 }
 
 local fear_phrases = {
-	"It's not that bad... right?",
-	"I don't want to die like this.",
-	"Is this really how it ends?",
-	"This isn't good.",
-	"Is this really how it ends?",
-	"I don't want to die like this.",
-	"I wish I had a way out.",
-	"I regret so many things.",
-	"This can't be it.",
-	"I can't believe this is happening to me.",
-	"I should've taken this more seriously.",
-	"What if I don't make it..?",
-	"This is worse than I thought.",
-	"This is so unfair.",
-	"I can't give up yet.",
-	"I never thought it would be like this.",
-	"I should've listened to my instincts.",
-	"Breathe. Just breathe.",
-	"Cold hands. Steady hands.",
+"Все не так уж плохо... правда?",
+"Я не хочу вот так умереть",
+	"Неужели все так и закончится?",
+	"Это нехорошо",
+"Неужели все так и закончится?",
+"Я не хочу вот так умирать",
+	"Хотел бы я, чтобы у меня был выход",
+"Я о стольком сожалею...",
+	"Этого не может быть",
+"Я не могу поверить, что это происходит со мной",
+"Мне следовало отнестись к этому серьезнее",
+"Что, если у меня ничего не получится?",
+"Все хуже, чем я думал...",
+"Это так несправедливо",
+"Я еще не могу сдаться так просто",
+"Я никогда не думал, что все будет так",
+"Я должен был прислушаться к своим инстинктам!",
+"Дыши. Просто дыши...",
+	"Ты должен быть холодным и уверенным...",
 }
 
 local is_aimed_at_phrases = {
-    "Oh God. This is it.",
-    "Don't. move.",
-    "Is this really how I die?",
-    "I should've run. Why didn't I run?",
-    "Please don't pull the trigger. Please.",
-    "I can see their finger on the trigger.",
-    "I don't want to die. Not like this.",
-    "If I beg, will it make it worse?",
-    "This can't be real. This can't be real.",
-    "Someone help me. Please. Someone.",
-    "I don't want to die in a place like this.",
-    "I don't want my last thought to be fear.",
-    "I don't want to die.",
+ "О Боже. Вот оно...",
+"Не двигайся.",
+"Неужели я действительно так умру?",
+"Я должен был бежать. Почему я не побежал?",
+"Пожалуйста, не нажимай на курок. Пожалуйста",
+"Я вижу, как их палец лежит на спусковом крючке",
+"Я не хочу умирать. Только не так...",
+"Если я буду умолять, станет ли только хуже?",
+"Этого не может быть на самом деле. Этого не может быть на самом деле...",
+"Кто-нибудь, помогите мне. Пожалуйста. Кто-нибудь!",
+"Я не хочу умирать в таком месте, как это!",
+"Я не хочу, чтобы моей последней мыслью был страх...",
+"Я не хочу умирать",
 }
 
 local near_death_poetic = {
-	"Trying to stand... but I just can't...",
-	"Breathing's just shallow sips of nothing...",
-	"Can't tell if my eyes are open or not anymore...",
-	"Last thing I'll taste is my own blood and copper.",
-	"Eyes keep sliding off things.",
-	"Can't remember how standing works.",
-	"Everything echoes inside my skull.",
-	"Blinking takes too long to come back.",
-	"Fingers won't close around anything.",
-	"Lungs refuse to be full.",
-	"Regrets are pointless now.",
+"Пытаюсь встать... но я просто не могу...",
+"Дыхание - это всего лишь мелкие глотки пустоты...",
+"Не могу понять, открыты мои глаза или нет...",
+"Последнее, что я почувствую, - это вкус собственной крови и металла",
+"Постоянно не могу сфокусироваться на чем-либо...",
+"Не могу вспомнить, как жить...",
+"Все отзывается эхом в моем черепе...",
+"Моргание занимает слишком много времени, чтобы восстановиться",
+"Пальцы не хотят сжиматься",
+"Легкие отказываются наполняться кислородом...",
+"Сожаления сейчас бессмысленны...",
 }
 
 local near_death_positive = {
-	"I don't want to die.",
-	"I have to survive.",
-	"There's still a chance.",
-	"I can't let fear win.",
-	"Just one more try.",
-	"I refuse to die here.",
-	"Alright... think this through.",
-	"Just stay still. Moving makes it worse.",
-	"Breathe slow. Panic won't help.",
-	"It's not over until it's over.",
-	"Pain is just a signal. Ignore it.",
-	"If this is it... at least it's gonna be quick.",
-	"I've survived worse. Probably.",
-	"This isn't how I pictured it.",
+"Я не хочу умирать...",
+"Я должен выжить!",
+"Еще есть шанс,сука...",
+"Я не могу позволить страху победить",
+"Еще одна попытка...",
+"Я отказываюсь умирать здесь!",
+"Хорошо... обдумай это.",
+"Просто не двигайся. От движения становится только хуже",
+"Дышите медленно. Паника не поможет,ничего уже блять не поможет!",
+"Это не конец, пока все не закончится",
+"Боль - это всего лишь сигнал. Не обращай внимания",
+"Если это так... то, по крайней мере, все будет быстро",
+"Я переживал и худшее. Наверное...",
+"Я себе это не так представлял,мда...",
 }
 
 local broken_limb = {
-	"FUCK. FUCK. ITS DEFINITELY BROKEN!",
-	"I CAN FEEL THE BONE PIECES MOVING!",
-	"IT'S FUCKING BROKEN. I THINK..",
-	"It hurts just thinking about it. Definitely broken.",
-	"I don't think it should bend here.",
-	"Oh fuck. It is snapped.",
-	"I don't see any open fracture, but I feel like I broke something",
+"ЧЕРТ! БЛЯТЬ! ЗДЕСЬ ОПРЕДЕЛЕННО ПЕРЕЛОМ!",
+"Я ЧУВСТВУЮ,КАК МОЯ КОСТЬ ДВИГАЕТСЯ ВО МНЕ",
+"СУКА,НАДЕЮСЬ ОНО ЗАЖИВЕТ!",
+"Мне больно даже думать об этом. Определенно сломана...",
+"Я не думаю, что она должна сгибаться здесьЁ",
+"О, черт. Она сломана,БЛЯТЬ!",
+"Я не вижу открытого перелома, но чувствую, что что-то сломал...",
 }
 
 local dislocated_limb = {
-	"Yeah that shouldn't be bending like that.",
-	"I have to get this bone back in.",
-	"No... I have to move it back in place.",
-	"It just hurts so much there. I might need a check up.",
-	"My limb is out of place.",
+"Да, она не должна так сгибаться,определенно...",
+"Я должен вправить эту кость,врачей то нет!",
+"Нет, я должен вернуть ее на место...",
+"Просто там очень больно. Возможно придется осмотреть себя",
+"Моя конечность не на месте",
 }
 
 local hungry_a_bit = {
-    "Mgh, I'm hungry...",
-    "Some food would be great...",
-    "I'm hungry...",
-    "I should eat something.",
+"Мммгрх, я проголодался...",
+"Было бы здорово перекусить...",
+"Я проголодался...",
+"Пора подкрепиться",
 }
 
 local very_hungry = {
-    "My stomach... Ugh...",
-    "If I don't eat, I'll feel even worse...",
-    "Stomach... Damn it... I feel sick",
+ "Мой желудок... Там определенно пусто...",
+"Если я не поем, мне будет еще хуже...",
+"Желудок... Черт возьми... Я чувствую себя больным",
 }
 
 local after_unconscious = {
-    "What happened? It hurts...",
-	"Where am I? Why does it hurt...",
-	"I-I thought I was going to die...",
-	"My head... What happened?",
-	"Did I almost die a second ago?",
-	"It felt like I died.",
-	"The heavens didn't take me?",
-	"Ohh-fuck... my head is aching...",
-	"Oh it's gonna be hard to get up right now... but I have to...",
-	"I don't recognize this place at all... or do I?",
-	"I don't want to experience this EVER AGAIN!",
+ "Что случилось? Мне больно...",
+"Где я? Почему так больно...",
+"Я думал, что умру...",
+"Моя голова... Что случилось?",
+"Я чуть не умер секунду назад?",
+"Такое чувство, что я умер минуту назад...",
+"Небеса не приняли меня?",
+"О, черт... у меня болит голова...",
+"О, будет трудно встать прямо сейчас... но я должен...",
+"Я совсем не узнаю это место... или мне кажется?",
+"Я не хочу испытать это... СНОВА!",
 }
 
 local slight_braindamage_phraselist = {
-	"I don't understand...",
-	"It doesn't make sense...",
-	"Where am I?",
-	"Huh? What is this..?",
-	"I don't know what is happening...",
-	"Hello?",
-	"Ughhh ohhhh...      huh...",
-	"What... is happening?",
+"Я не понимаю...",
+"Это не имеет смысла...",
+"Где я?",
+"А? Что это..?",
+"Я не понимаю, что происходит...",
+"Привет?",
+"Ааааааа...      ха-ха...",
+"Что... происходит?",
 }
 
 local braindamage_phraselist = {
-	"Bbbee.. wheea mgh?!",
-	"Bmmeee... mehk...",
-	"Mm--hhhh. Mmm?",
-	"Ghmgh whhh...",
-	"Ahgg...mg?",
-	"Hgghh... D-Dmmh.",
-	"Lmmmphf, mp-hf!",
-	"Heeelllhhpphp...",
-	"Nghh... Gmh?",
-	"Ggg... Bgh..",
-	"Bhrhraihin.",
+	"Де-еее... йааа... сеьь-чайс...?!",
+	"Чтьььо случииииилгрнххааньяяясь?",
+	"Мхрг... грхАа?",
+	"Гдээээ вс....эээ?",
+	"Ааргх..?",
+	"Хххргх... Сыыка...",
+	"Чййооорт... Баййлит!",
+	"Помогиитхтхтхе...",
+	"Агрхх,ээээ?",
+	"Грх...Бэээ?",
+	"Мазгашшштурм какакййййй-та...",
 }
 
-local cold_phraselist = {
-	"It's getting very cold..",
-	"Too cold for me.",
-	"I'm shivering, fucking hell, man.",
-	"Extremely chilly out here..",
-	"Need something to heat up...",
-	"I feel pretty cold...",
-	"I feel sick from that cold, fuck."
-}
-
-local freezing_phraselist = {
-	"I.. ca.. can't feel m-my b-body..",
-	"I can't.. f-feel my legs...",
-	"I'm f-fuck-king fre-ezing..",
-	"I-I think-k my face is num-mb..",
-	"Cold-d..",
-	"I.. can't feel any-ythi-ing..",
-}
-
-local numb_phraselist = {
-	"It's not.. cold anymore..",
-	"Why... does it feel warm..?",
-	"I think I'm okay... I think...",
-	"Finally some warmth...",
-	"I'm warm again... Somehow...",
-	"I was just freezing... Where did this heat come from..?",
-}
-
-local hot_phraselist = {
-	"I'm so sweaty..",
-	"This heat is killing me..",
-	"My clothing is covered in sweat, fuck.",
-	"My sweat fucking reeks. I should really cool down...",
-	"It's a bit too hot, fuck, man.",
-	"I'm heating up real bad...",
-	"Why is it so hot in here?",
-}
-
-local heatstroke_phraselist = {
-	"I NEED WATER!!",
-	"Please... water...",
-	"I feel dizzy... Fuuck-",
-	"MY HEAD!- It hurts..",
-	"My head is aching..",
-}
-
-local heatvomit_phraselist = {
-	"That heat..- I'm gonna vomit-",
-	"Ugghhh... I'm about to puke-",
-	"Fuuck.. Oughhh.. I don't feel-"
-}
-
-local hg_showthoughts = ConVarExists("hg_showthoughts") and GetConVar("hg_showthoughts") or CreateClientConVar("hg_showthoughts", "1", true, true, "Toggle thoughts of your character", 0, 1)
+local hg_showthoughts = ConVarExists("hg_showthoughts") and GetConVar("hg_showthoughts") or CreateClientConVar("hg_showthoughts", "1", true, true, "Show the thoughts of your character", 0, 1)
 
 function string.Random(length)
 	local length = tonumber(length)
@@ -303,13 +251,11 @@ function hg.likely_to_phrase(ply)
 	local brain = org.brain
 	local blood = org.blood
 	local fear = org.fear
-	local temperature = org.temperature
 	local broken_dislocated = org.just_damaged_bone and ((org.just_damaged_bone - CurTime()) < -3)
 
 	return (broken_dislocated) and 5
+		or (pain > 75) and 5
 		or (pain > 65) and 5
-		or (temperature < 31 and 0.5)
-		or (temperature > 38 and 0.5)
 		or (blood < 3000 and 0.3)
 		--or (fear > 0.5 and 0.7)
 		or (brain > 0.1 and brain * 5)
@@ -330,9 +276,9 @@ local function get_status_message(ply)
 		end
 	end
 
-	local nomessage = hook.Run("HG_CanThoughts", ply) --ply.PlayerClassName == "Gordon" || ply.PlayerClassName == "Combine"
-	if nomessage ~= nil and nomessage == false then return "" end
+	local nomessage = ply.PlayerClassName == "Gordon" || ply.PlayerClassName == "Combine"
 
+	if nomessage then return "" end
     if ply:GetInfoNum("hg_showthoughts", 1) == 0 then return "" end
 
 	local org = ply.organism
@@ -341,7 +287,6 @@ local function get_status_message(ply)
 
 	local pain = org.pain
 	local brain = org.brain
-	local temperature = org.temperature
 	local blood = org.blood
 	local hungry = org.hungry
 	local broken_dislocated = org.just_damaged_bone and ((org.just_damaged_bone + 3 - CurTime()) < -3)
@@ -359,16 +304,6 @@ local function get_status_message(ply)
 	local str = ""
 
 	local most_wanted_phraselist
-	
-	if temperature < 35 then
-		most_wanted_phraselist = temperature > 31 and cold_phraselist or (temperature < 28 and numb_phraselist or freezing_phraselist)
-	elseif temperature > 38 then
-		most_wanted_phraselist = temperature < 40 and hot_phraselist or heatstroke_phraselist
-	end
-
-	if not most_wanted_phraselist and hungry and hungry > 25 and math.random(3) == 1 then
-		most_wanted_phraselist = hungry > 45 and very_hungry or hungry_a_bit
-	end
 
 	if (blood < 3100) or (pain > 75) or (broken_dislocated) or (broken_notify) or (dislocated_notify) then
 		if pain > 75 and (broken_dislocated) then
@@ -395,13 +330,17 @@ local function get_status_message(ply)
 	elseif after_unconscious_notify then
 		most_wanted_phraselist = after_unconscious
 	elseif hg.nothing_happening(ply) then
-		most_wanted_phraselist = random_phrase
+		//most_wanted_phraselist = random_phrase
 
 		if hungry and hungry > 25 and math.random(5) == 1 then
 			most_wanted_phraselist = hungry > 45 and very_hungry or hungry_a_bit
 		end
-	elseif hg.fearful(ply) then
-		most_wanted_phraselist = ((IsAimedAt(ply) > 0.9) and is_aimed_at_phrases or (math.random(10) == 1 and fear_hurt_ironic or fear_phrases))
+	--elseif hg.fearful(ply) then
+		--most_wanted_phraselist = ((IsAimedAt(ply) > 0.9) and is_aimed_at_phrases or (math.random(10) == 1 and fear_hurt_ironic or fear_phrases))
+	end
+
+	if not most_wanted_phraselist and hungry and hungry > 25 and math.random(3) == 1 then
+		most_wanted_phraselist = hungry > 45 and very_hungry or hungry_a_bit
 	end
 
 	if brain > 0.1 then
@@ -415,35 +354,6 @@ local function get_status_message(ply)
 	else
 		return ""
 	end
-end
-
-local allowedlist_types = {
-	heatvomit = heatvomit_phraselist,
-}
-
-function hg.get_phraselist(ply, type)
-	if not IsValid(ply) then
-		if CLIENT then
-			ply = lply
-		else
-			return
-		end
-	end
-	
-	local nomessage = ply.PlayerClassName == "Gordon" || ply.PlayerClassName == "Combine"
-
-	if nomessage then return "" end
-    if ply:GetInfoNum("hg_showthoughts", 1) == 0 then return "" end
-
-	local org = ply.organism	
-	if not org or not org.brain then return "" end
-
-	if not isstring(type) or not allowedlist_types[type] then return "" end
-
-	local needed_list = allowedlist_types[type]
-
-	local str = needed_list[math.random(#needed_list)]
-	return str
 end
 
 function hg.get_status_message(ply)

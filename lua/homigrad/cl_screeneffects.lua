@@ -1,7 +1,7 @@
 local function DrawSunEffect()
 	local sun = util.GetSunInfo()
 	if not sun then return end
-	if not sun.obstruction == 0 or sun.obstruction == 0 or !sun.direction then return end
+	if not sun.obstruction == 0 or sun.obstruction == 0 then return end
 	local sunpos = EyePos() + sun.direction * 1024 * 4
 	local scrpos = sunpos:ToScreen()
 	local dot = (sun.direction:Dot(EyeVector()) - 0.8) * 5
@@ -69,7 +69,7 @@ hook.Add("RenderScreenspaceEffects", "homigrad", function()
 		addtiveLayer["brightness"] = Lerp(weight, 0, layer["brightness"] or 0)
 		--end
 	end
-
+	
 	//DrawBloom(addtiveLayer.bloom_darken, addtiveLayer.bloom_mul, addtiveLayer.bloom_sizex, addtiveLayer.bloom_sizey, addtiveLayer.bloom_passes, addtiveLayer.bloom_colormul, addtiveLayer.bloom_colorr, addtiveLayer.bloom_colorg, addtiveLayer.bloom_colorb)
 	//DrawSharpen(addtiveLayer.sharpen, addtiveLayer.sharpen_dist)
 	//if not brain_motionblur then DrawMotionBlur(addtiveLayer.blur_addalpha, addtiveLayer.blur_drawalpha, addtiveLayer.blur_delay) end
@@ -222,13 +222,12 @@ end )]]
 --that one furry game
 
 
-local painMat = Material("effects/shaders/zb_grain")
-local noiseMat = Material("effects/shaders/zb_grainwhite")
-local vignetteMat = Material("effects/shaders/zb_vignette")
-local assimilationMat = Material("effects/shaders/zb_assimilation")
-local coldMat = Material("effects/shaders/zb_colda")
-local grainMat = Material("effects/shaders/zb_grain2")
-local heatMat = Material("effects/shaders/zb_heat")
+local painMat = Material( "effects/shaders/zb_grain" )
+local noiseMat = Material( "effects/shaders/zb_grainwhite" )
+local vignetteMat = Material( "effects/shaders/zb_vignette" )
+local assimilationMat = Material( "effects/shaders/zb_assimilation" )
+local coldMat = Material( "effects/shaders/zb_colda" )
+local grainMat = Material( "effects/shaders/zb_grain2" )
 
 local PainLerp = 0
 local O2Lerp = 0
@@ -318,7 +317,7 @@ local stations = {
 }
 
 local choosera = 1
-local tempolerp = 0
+
 hook.Add("Post Post Processing", "ItHurts", function()
 	local spect = IsValid(lply:GetNWEntity("spect")) and lply:GetNWEntity("spect")
 	
@@ -354,30 +353,16 @@ hook.Add("Post Post Processing", "ItHurts", function()
 	local brain = org.brain or 0
 	O2Lerp = LerpFT(0.01, O2Lerp, (30 - o2) * (org.otrub and 2 or 10) + (brain * 100) * (org.otrub and 1 or 5))
 
-	tempLerp = LerpFT(0.01, tempLerp, org.temperature)
-
-	if tempLerp > 38 then
-		local heat = tempLerp - 38
-
-		render.UpdateScreenEffectTexture()
-
-		heatMat:SetFloat("$c0_x", -CurTime() * 0.25)//math.sin(CurTime() * 0.1) * CurTime() * 0.01) //time
-		heatMat:SetFloat("$c0_y", 0.06 * heat)//(math.sin(CurTime()) + 1) * 2) //intensity (strict)
-		heatMat:SetFloat("$c2_x", (math.sin(CurTime()) - 2) * heat)
-
-		render.SetMaterial(heatMat)
-		render.DrawScreenQuad()
-	end
-
 	local pain = org.pain or 0
 	pain = math.max(pain - 15, 0)
 	local shock = (org.shock or 0) * 1 + (1 - org.consciousness) * 40
-	shockLerp = LerpFT(0.01, shockLerp or 0, shock + (lply.suiciding and 30--[[math.max(0, org.heartbeat - 90)]] or 0))
+	shockLerp = LerpFT(0.01, shockLerp or 0, shock)
 	consciousnessLerp = LerpFT(org.consciousness < (consciousnessLerp or 1) and 1 or 0.01, consciousnessLerp or 1, org.consciousness)
 	-- local immobilization = org.immobilization
 	PainLerp = LerpFT(0.05, PainLerp, math.max(pain * (org.otrub and 0.2 or 1), 0))
 	assimilatedLerp = LerpFT(0.01, assimilatedLerp, (org.assimilated or 0))
-
+	tempLerp = LerpFT(0.01, tempLerp, org.temperature)
+	
 	if assimilatedLerp > 0.001 then
 		render.UpdateScreenEffectTexture()
 
@@ -432,13 +417,12 @@ hook.Add("Post Post Processing", "ItHurts", function()
 		render.DrawScreenQuad()
 	end
 
-	local tempo = math.Clamp((5 - (tempLerp - 29)) * 0.5 - 5 * (org.heartbeat < 1 and 1 or 0), 0, 5)
-	tempolerp = LerpFT(0.01, tempolerp, tempo)
-	
-	if (tempolerp > 0) then
+	if (tempLerp < 34) then
+		local tempo = math.Clamp((5 - (tempLerp - 29)) * 0.5, 0, 5)
+
 		render.UpdateScreenEffectTexture()
 
-		coldMat:SetFloat("$c0_y", tempolerp)
+		coldMat:SetFloat("$c0_y", tempo)
 		
 		render.SetMaterial(coldMat)
 		render.DrawScreenQuad()
@@ -577,8 +561,7 @@ hook.Add("Post Post Processing", "ItHurts", function()
 		show_image_time = 0
 		lobotomy_index = 0
 	end
-	hook.Run("Post Post Pre Post Processing")
-
+	
 	if O2Lerp > 1 then
 		render.UpdateScreenEffectTexture()
 		

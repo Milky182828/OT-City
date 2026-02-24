@@ -14,7 +14,7 @@ MODE.OverrideSpawn = true
 MODE.LootSpawn = true
 MODE.LootOnTime = true
 
-MODE.Chance = 0.05
+MODE.Chance = 0.28
 MODE.LootDivTime = 500
 
 MODE.LootTable = {
@@ -138,6 +138,8 @@ MODE.LootTableStandard = {
 		{5,"weapon_bloodbag"},
 		{4,"hg_flashlight"},
 		{1,"weapon_matches"},--for dumbasses
+		{2,"weapon_osapb"},
+		{2,"weapon_mp-80"},
 	}},
 	{35, {
 		{1,"weapon_hammer"},
@@ -180,61 +182,61 @@ MODE.LootTableStandard = {
 -- }
 
 MODE.TraitorWordsAdjectives = {
-	"pretty",
-	"sad",
-	"bad",
-	"cool",
-	"happy",
-	"ugly",
-	"funny",
-	"red",
-	"green",
-	"blue",
-	"yellow",
-	"orange",
-	"cyan",
-	"pink",
-	"mesmerizing",
+"красивый",
+"грустный",
+"плохой",
+"крутой",
+"счастливый",
+"уродливый",
+"забавный",
+"красный",
+"зеленый",
+"синий",
+"желтый",
+"оранжевый",
+"голубой",
+"розовый",
+"завораживающий",
 	"",	--; да да
 }
 
 MODE.TraitorWords = {
-	"crate",
-	"death",
-	"man",
-	"revolver",
-	"door",
-	"pistol",
-	"traitor",
-	"gunman",
-	"ak rifle",
-	"bomb",
-	"cyanide",
-	"knife",
-	"pipe",
-	"axe",
-	"usp pistol",
-	"ar15 rifle",
-	"kar98k rifle",
-	"grenade",
-	"outside",
-	"building",
-	"ammo",
-	"bandage",
-	"medkit",
-	"painkillers",
-	"shotgun",
-	"melancholic",
-	"poison",
-	"murder",
+"ящик",
+"смерть",
+"человек",
+"револьвер",
+"дверь",
+"пистолет",
+"предатель",
+"стрелок",
+"автомат ак",
+"бомба",
+"цианид",
+"нож",
+"трубка",
+"топор",
+"пистолет usp",
+"винтовка ar15",
+"винтовка kar98k",
+"граната",
+"снаружи",
+"здание",
+"боеприпасы",
+"бинт",
+"аптечка",
+"обезболивающие",
+"дробовик",
+"меланхолик",
+"яд",
+"убийство",
 }
 
 MODE.TraitorActions = {
-	"punch air or walls",
-	"jump",
-	"crouch",
-	"ragdoll randomly",
-	"spin around",
+"бей кулаками по воздуху или стенам",
+"прыгай",
+"приседай",
+"играй тряпичной куклой",
+"вращайся вокруг своей оси",
 }
 
 SetGlobalBool("RolesPlus_Enable", true)
@@ -248,14 +250,14 @@ util.AddNetworkString("hmcd_announce_traitor_lose")
 MODE.Type = MODE.Type or "standard"
 MODE.Types = MODE.Types or {}
 MODE.Types.standard = {
-	ChanceFunction = function() return (zb.GetWorldSize() < ZBATTLE_BIGMAP) and 0.05 or 0 end,
+	ChanceFunction = function() return (zb.GetWorldSize() < ZBATTLE_BIGMAP) and 0.4 or 0 end,
 	LootTable = MODE.LootTableStandard,
 	Messages = {
-		[3] = "Everyone died.",
-		[1] = "The murderer has killed everyone.",
-		[0] = "The murderer was",
+		[3] = "Все сдохли нахуй. ЛОШАРЫ!!!",
+		[1] = "Маньяк убил всех.",
+		[0] = "Маньяк",
 	},
-	Message = "The murderer was ",
+	Message = "Маньяком был",
 	TraitorLoot = function(ply)
 		ply:Give("weapon_buck200knife")
 		ply:Give("weapon_hg_type59_tpik")
@@ -268,7 +270,12 @@ MODE.Types.standard = {
 		ply:Give("weapon_traitor_poison3")
 		ply:Give("weapon_traitor_poison_consumable")
 		ply:Give("weapon_traitor_suit")
-		local wep = ply:Give("weapon_zoraki")
+		local wep = ply:Give("weapon_glock17")
+		ply:GiveAmmo(wep:GetMaxClip1() * 3,wep:GetPrimaryAmmoType(),true)
+				if math.random(0,1) then
+			hg.AddAttachmentForce(ply,wep,"laser3")
+			hg.AddAttachmentForce(ply,wep,"supressor4")
+		end
 		timer.Simple(1,function() wep:ApplyAmmoChanges(2) end)
 
 		ply.organism.stamina.range = 220
@@ -278,7 +285,7 @@ MODE.Types.standard = {
 		ply:SetNetVar("Inventory",inv)
 	end,
 	GunManLoot = function(ply)
-		ply:Give("weapon_px4beretta")
+		ply:Give("weapon_m9beretta")
 		ply.organism.recoilmul = 1
 	end,
 	PoliceTime = 220,
@@ -323,14 +330,14 @@ MODE.Types.standard = {
 	end
 }
 MODE.Types.wildwest = {
-	ChanceFunction = function() return (zb.GetWorldSize() < ZBATTLE_BIGMAP) and 0.02 or 0 end,
+	ChanceFunction = function() return (zb.GetWorldSize() < ZBATTLE_BIGMAP) and 0.1 or 0 end,
 	LootTable = MODE.LootTableStandard,
 	Messages = {
-		[3] = "The dead silence fills the empty city...",
-		[1] = "The town has fallen into the hands of crime.",
-		[0] = "The law was settled once again. The bastard is",
+[3] = "Мертвая тишина наполняет пустой город...",
+[1] = "Город попал в руки преступности",
+[0] = "Закон снова восторжествовал. Этот ублюдок...",
 	},
-	Message = "The criminal was ",
+	Message = "Беззаконником был ",
 	TraitorLoot = function(ply)
 		ply:Give("weapon_sogknife")
 		ply:Give("weapon_hg_type59_tpik")
@@ -404,7 +411,7 @@ MODE.Types.wildwest = {
 					"weapon_doublebarrel_short"
 				}
 
-				local weapon = v:Give(guns[math.random(#guns)], true)
+				local weapon = v:Give(table.Random(guns), true)
 				weapon:SetClip1(weapon:GetMaxClip1())
 			end
 
@@ -458,14 +465,14 @@ MODE.Types.wildwest = {
 }
 
 MODE.Types.gunfreezone = {
-	ChanceFunction = function() return (zb.GetWorldSize() < ZBATTLE_BIGMAP) and 0.02 or 0 end,
+	ChanceFunction = function() return (zb.GetWorldSize() < ZBATTLE_BIGMAP) and 0.1 or 0 end,
 	LootTable = MODE.LootTableStandard,
 	Messages = {
-		[3] = "Everyone died.",
-		[1] = "The murderer has killed everyone.",
-		[0] = "The murderer was",
+		[3] = "Все умерли.",
+		[1] = "Маньяк выполнил свою цель.",
+		[0] = "Маньяк ",
 	},
-	Message = "The murderer was ",
+	Message = "Маньяком был  ",
 	TraitorLoot = function(ply)
 		ply:Give("weapon_buck200knife")
 		ply:Give("weapon_hg_type59_tpik")
@@ -479,7 +486,9 @@ MODE.Types.gunfreezone = {
 		ply:Give("weapon_traitor_poison_consumable")
 		ply:Give("weapon_traitor_suit")
 
-		local wep = ply:Give("weapon_zoraki")
+		local wep = ply:Give("weapon_glock17")
+		hg.AddAttachmentForce(ply,wep,"laser3")
+		hg.AddAttachmentForce(ply,wep,"supressor4")
 		timer.Simple(1,function() wep:ApplyAmmoChanges(2) end)
 
 		ply.organism.stamina.range = 220
@@ -533,16 +542,16 @@ MODE.Types.gunfreezone = {
 }
 
 MODE.Types.soe = {
-	ChanceFunction = function() return (zb.GetWorldSize() >= ZBATTLE_BIGMAP) and 0.05 or 0 end,
+	ChanceFunction = function() return (zb.GetWorldSize() >= ZBATTLE_BIGMAP) and 0.4 or 0 end,
 	LootTable = MODE.LootTable,
 	Messages = {
-		[3] = "Everyone died.",
-		[1] = "The traitor has killed everyone.",
-		[0] = "The traitor was",
+		[3] = "Все сдохли.",
+		[1] = "Предатель убил всех.",
+		[0] = "Предатель",
 	},
-	Message = "The traitor was ",
+	Message = "Предателем был ",
 	TraitorLoot = function(ply)
-		local p22 = ply:Give("weapon_p22")
+		local p22 = ply:Give("weapon_glock26")
 		hg.AddAttachmentForce(ply,p22,"supressor4")
 		ply:Give("weapon_sogknife")
 		ply:Give("weapon_hg_type59_tpik")
@@ -561,7 +570,7 @@ MODE.Types.soe = {
 		ply:SetNetVar("Inventory",inv)
 	end,
 	GunManLoot = function(ply)
-		local gun = ply:Give( ( math.random(1,2) > 1 and "weapon_remington870" ) or "weapon_kar98" )
+		local gun = ply:Give( ( math.random(1,2) > 1 and "weapon_m590a1" ) or "weapon_kar98" )
 		ply.organism.recoilmul = 1.0
 		if gun:GetClass() == "weapon_kar98" then
 			hg.AddAttachmentForce(ply,gun,"optic12")
@@ -626,6 +635,8 @@ local modes = {
 	"gunfreezone",
 }
 
+local setmode = ConVarExists("homicide_setmode") and GetConVar("homicide_setmode") or CreateConVar( "homicide_setmode", "random", FCVAR_NONE, "sets hmcd mode" )
+
 util.AddNetworkString("HMCD_RoundStart")
 
 function MODE:GetPlySpawn(ply)
@@ -638,7 +649,7 @@ end
 function MODE:Intermission()
 	game.CleanUpMap()
 
-	local _, CROUND = CurrentRound()
+	local _,CROUND = CurrentRound()
 
 	if not CROUND or CROUND == "hmcd" then
 		CROUND = table.Random(self:SubModes())
@@ -930,7 +941,7 @@ function MODE:RoundThink()
 	
 			if spawned > 0 then
 				self.PoliceSpawned = true
-				PrintMessage(HUD_PRINTTALK, "Police have arrived.")
+				PrintMessage(HUD_PRINTTALK, "Полиция приехала.")
 				EmitSound("snd_jack_hmcd_policesiren.wav", vector_origin, 0, CHAN_AUTO, 1, 125, 0, 100)
 			end
 		end
@@ -952,7 +963,7 @@ function MODE:RoundThink()
 			local count = math.min(#available, 5)
 	
 			if count > 0 then
-				PrintMessage(HUD_PRINTTALK, "SWAT team incoming!")
+				PrintMessage(HUD_PRINTTALK, "Спецназ приехал!")
 				EmitSound("snd_jack_hmcd_heli2.mp3", vector_origin, 0, CHAN_AUTO, 1, 125, 0, 100)
 				MODE:SpawnForce("swat", count)
 			end
@@ -967,7 +978,7 @@ function MODE:RoundThink()
 			local spawned = self:SpawnForce("nationalguard", count)
 			if spawned > 0 then
 				self.PoliceSpawned = true
-				PrintMessage(HUD_PRINTTALK, self.Types[self.Type].PoliceText or "National Guard have arrived.")
+				PrintMessage(HUD_PRINTTALK, self.Types[self.Type].PoliceText or "Национальная гвардия примчала.")
 				EmitSound(self.Types[self.Type].PoliceSound or "snd_jack_hmcd_heli2.mp3", vector_origin, 0, CHAN_AUTO, 1, 125, 0, 100)
 			end
 		end
@@ -1008,15 +1019,12 @@ function MODE:SpawnForce(teamtype, count)
     return spawned
 end
 
-local function tbl_Random(tbl) -- when you can't even say
-	return tbl[math.random(#tbl)] -- my name
-end
 function MODE:EquipSWAT(ply, index)
     ply:SetPlayerClass("swat")
     
     local classes = {
-        [1] = function() return tbl_Random({"weapon_m4a1", "weapon_hk416"}) end, --;; Team Leader
-        [2] = function() ply:Give("weapon_ram") return tbl_Random({"weapon_remington870", "weapon_m590a1"}) end, --;; Breacher
+        [1] = function() return table.Random({"weapon_m4a1", "weapon_hk416"}) end, --;; Team Leader
+        [2] = function() ply:Give("weapon_ram") return table.Random({"weapon_remington870", "weapon_m590a1"}) end, --;; Breacher
         [3] = function() return "weapon_mp5" end, --;; Pointman
         [4] = function() return "weapon_sr25" end, --;; Marksman
         [5] = function()
@@ -1045,7 +1053,7 @@ function MODE:EquipSWAT(ply, index)
 	local gun = ply:Give("weapon_taser")
 	ply:GiveAmmo(gun:GetMaxClip1() * 3, gun:GetPrimaryAmmoType(),true)
 
-	hg.AddArmor(ply, {"helmet6", "vest8", tbl_Random({"mask1", "mask2", "nightvision1"})})
+	hg.AddArmor(ply, {"helmet6", "vest8", table.Random({"mask1", "mask2", "nightvision1"})})
 
     local inv = ply:GetNetVar("Inventory") or {}
     inv["Weapons"] = inv["Weapons"] or {}
@@ -1358,7 +1366,7 @@ function MODE:EndRound()
 		else
 			if traitor and IsValid(traitor) then
 				--local CheckAlive = #self:CheckAlivePlayers()[1]
-				PrintMessage(HUD_PRINTTALK, self.Types[self.Type].Messages[winner]..(winner == 0 and (traitor:Alive() and " neutralized." or " killed.") or ""))
+				PrintMessage(HUD_PRINTTALK, self.Types[self.Type].Messages[winner]..(winner == 0 and (traitor:Alive() and " нейтрализован." or " убит.") or ""))
 				
 				timer.Simple(2, function()
 					PrintMessage(HUD_PRINTTALK, self.Types[self.Type].Message..traitor:Name())
@@ -1374,7 +1382,7 @@ function MODE:EndRound()
 				
 				hook.Run("ZB_TraitorWinOrNot", traitor, winner)
 			else
-				PrintMessage(HUD_PRINTTALK, self.Types[self.Type].Messages[winner]..(winner == 0 and (" killed.") or ""))
+				PrintMessage(HUD_PRINTTALK, self.Types[self.Type].Messages[winner]..(winner == 0 and (" убит.") or ""))
 			end
 		end
 	end
@@ -1456,11 +1464,11 @@ hook.Add("Player_Death", "HMCD_PlayerDeath", function(ply, _)
 			if not biggest_attacker or not IsValid(ply) then return end
 			
 			if biggest_attacker == ply:Name() then
-				ply:ChatPrint("You suicided.")
+				ply:ChatPrint("Ты совершил самоубийство.")
 			elseif not biggest_attacker then
-				ply:ChatPrint("You have died.")
+				ply:ChatPrint("Ты умер.")
 			else
-				ply:ChatPrint("You were killed by "..biggest_attacker..".")
+				ply:ChatPrint("Ты был убит "..biggest_attacker..".")
 			end
 		end
 	end)

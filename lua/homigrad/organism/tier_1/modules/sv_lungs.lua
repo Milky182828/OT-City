@@ -231,7 +231,7 @@ module[2] = function(owner, org, timeValue)
 		local sprayed = org.is_sprayed_at
 		org.is_sprayed_at = nil
 
-		local regenerate = regen * timeValue * 2 * (org.stamina[1] / org.stamina.max) * (mask_blevota and 0 or 1) * ((org.temperature > 38) and math.Clamp(math.Remap(org.temperature, 38, 41, 1, 0.1), 0.1, 1) or 1)
+		local regenerate = regen * timeValue * 2 * (org.stamina[1] / org.stamina.max) * (mask_blevota and 0 or 1)
 		o2[1] = min(o2[1] + regenerate * math.Clamp(org.o2[1] / 30, 0.25, 1) * (org.holdingbreath and 0 or 1) * (sprayed and 0 or 1) * min((10 / max(org.CO,1)),1), o2.range * math.max(1 - org.pneumothorax * org.pneumothorax, 0.1) * math.min(org.blood / 4500, 1) * math.max(1 - (org.lungsL[1] + org.lungsR[1]) / 2, 0.5))
 
 		o2.curregen = regenerate
@@ -248,7 +248,7 @@ module[2] = function(owner, org, timeValue)
 		o2[1] = math.max(5, o2[1])
 	end
 	
-	if org.isPly and not org.otrub and o2.curregen < losing_oxy and org.analgesia <= 1.5 and !org.heartstop then
+	if org.isPly and not org.otrub and o2.curregen < losing_oxy and org.analgesia <= 1.5 then
 		if mask_blevota then
 			if o2[1] < 15 then
 				org.owner:Notify("DROP THE FUCKING MASK", 25, "take_gasmask2", 0, nil, color_red2)
@@ -278,10 +278,6 @@ module[2] = function(owner, org, timeValue)
 		if math.Rand(0, 500) < (org.analgesia + org.painkiller) then
 			//org.lungsfunction = false
 		end
-	end
-
-	if (org.lungsL[1] == 1 and org.lungsR[1] == 1) or org.heartstop then
-		org.lungsfunction = false
 	end
 
 	if o2[1] == 0 then
@@ -360,7 +356,7 @@ module[2] = function(owner, org, timeValue)
 			end
 		end
 
-		if org.brain > 0.35 and !org.heartstop then
+		if org.brain > 0.35 then
 			if math.random(60) == 1 then
 				org.lungsfunction = true
 			end
@@ -396,6 +392,6 @@ module[2] = function(owner, org, timeValue)
 			end
 		end
 		
-		org.brain = min(org.brain + timeValue / (org.brain < 0.3 and 300 or 300) * math.min(((org.o2[1] < 0.25 and 1 or 0) + org.skull), 1), 1)
+		org.brain = min(org.brain + timeValue / (org.brain < 0.3 and 300 or 120) * math.min(((org.o2[1] < 0.25 and 1 or 0) + org.skull), 1), 1)
 	end --~120 seconds to fully die (0.3 of 300 and 0.4 of 60 seconds after)
 end

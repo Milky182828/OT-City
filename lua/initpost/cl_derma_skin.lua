@@ -1,16 +1,16 @@
 --\\
 hg.VGUI = hg.VGUI or {}
-hg.VGUI.MainColor = Color(150, 0 ,0)
-hg.VGUI.SecondaryColor = Color(155,0,0,240)
+hg.VGUI.MainColor = Color(29, 255 ,9)
+hg.VGUI.SecondaryColor = Color(16,255,68,240)
 hg.VGUI.BackgroundColor = Color(25,25,35,220)
-hg.VGUI.MainSkin = "ZCity"
+hg.VGUI.MainSkin = "OTSO-CITY"
 
 function hg.GetMainSkin()
 	return hg.VGUI.MainSkin
 end
 --//
 
-hook.Add("ForceDermaSkin", "ZCity", function()
+hook.Add("ForceDermaSkin", "OTSO-CITY", function()
 	return "ZCity" --; This will paint all Derma objects to new skin
 end)
 
@@ -132,11 +132,11 @@ SKIN.Colours.Warning = Color(230, 180, 0)
 SKIN.Colours.MenuLabel = color_white
 SKIN.Colours.DarkerBackground = Color(0, 0, 0, 77)
 
-SKIN.Colours.Outline = Color(155, 0, 0, 255)
+SKIN.Colours.Outline = Color(43, 233, 18)
 SKIN.Colours.Background = Color(0, 0, 0, 205)
 
 SKIN.Colours.SegmentedProgress = {}
-SKIN.Colours.SegmentedProgress.Bar = Color(64, 185, 85)
+SKIN.Colours.SegmentedProgress.Bar = Color(245, 78, 0)
 SKIN.Colours.SegmentedProgress.Text = color_white
 
 SKIN.Colours.Area = {}

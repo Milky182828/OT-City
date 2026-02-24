@@ -110,11 +110,11 @@ hook.Add("HUDPaint","FUCKINGSAMENAMEUSEDINHOOKFUCKME",function()
 	
 	surface.SetFont("HomigradFont")
 	surface.SetTextColor(255, 255, 255, 255)
-	local txt = "Spectating player: "..spect:Name()
+	local txt = "Слежка за игроком: "..spect:Name()
 	local w, h = surface.GetTextSize(txt)
 	surface.SetTextPos(ScrW() / 2 - w / 2, ScrH() / 8 * 7)
 	surface.DrawText(txt)
-	local txt = "In-game name: "..spect:GetPlayerName()
+	local txt = "Имя в игре: "..spect:GetPlayerName()
 	local w, h = surface.GetTextSize(txt)
 	surface.SetTextPos(ScrW() / 2 - w / 2, ScrH() / 8 * 7 + h)
 	surface.DrawText(txt)
@@ -313,7 +313,7 @@ hook.Add("Player Disconnected","retrymenu",function(data)
 end)
 
 --local hg_coolvetica = ConVarExists("hg_coolvetica") and GetConVar("hg_coolvetica") or CreateClientConVar("hg_coolvetica", "0", true, false, "changes every text to coolvetica because its good", 0, 1)
-local hg_font = ConVarExists("hg_font") and GetConVar("hg_font") or CreateClientConVar("hg_font", "Bahnschrift", true, false, "Change UI text font")
+local hg_font = ConVarExists("hg_font") and GetConVar("hg_font") or CreateClientConVar("hg_font", "Bahnschrift", true, false, "change every text font to selected because ui customization is cool")
 local font = function() -- hg_coolvetica:GetBool() and "Coolvetica" or "Bahnschrift"
     local usefont = "Bahnschrift"
 
@@ -421,8 +421,8 @@ hook.Add("InitPostEntity", "furryhuy", function()
 end)
 
 local colGray = Color(122,122,122,255)
-local colBlue = Color(130,10,10)
-local colBlueUp = Color(160,30,30)
+local colBlue = Color(20, 130, 20)
+local colBlueUp = Color(40, 170, 40)
 local col = Color(255,255,255,255)
 
 local colSpect1 = Color(75,75,75,255)
@@ -439,7 +439,7 @@ local function OpenPlayerSoundSettings(selfa, ply)
 	
 	if not hg.playerInfo[ply:SteamID()] or not istable(hg.playerInfo[ply:SteamID()]) then addToPlayerInfo(ply, false, 1) end
 
-	local mute = Menu:AddOption( "Mute", function(self)
+	local mute = Menu:AddOption( "Замутить", function(self)
 		if hg.muteall || hg.mutespect then return end
 		
 		self:SetChecked(not ply:IsMuted())
@@ -464,7 +464,7 @@ local function OpenPlayerSoundSettings(selfa, ply)
 
 	function volumeSlider:Paint(w,h)
 		draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0 ) )
-		draw.RoundedBox( 0, 0, 0, w*self:GetSlideX(), h, Color( 255, 0, 0 ) )
+		draw.RoundedBox( 0, 0, 0, w*self:GetSlideX(), h, Color( 0, 180, 0 ) )
 		draw.DrawText( ( math.Round( 100*self:GetSlideX(), 0 ) ).."%", "DermaDefault", w/2, h/4, color_white, TEXT_ALIGN_CENTER )
 	end
 	function volumeSlider.Knob.Paint(self) end
@@ -472,8 +472,6 @@ local function OpenPlayerSoundSettings(selfa, ply)
 	Menu:AddPanel(volumeSlider)
 	Menu:Open()
 end
-
-
 
 hook.Add("Player Getup", "nomorespect", function(ply)
 	if not hg.mutespect then return end
@@ -525,10 +523,15 @@ function GM:ScoreboardShow()
 	local w, h = ScreenScale(30),ScreenScale(6)
 	muteallbut:SetPos(scoreBoardMenu:GetWide()-w*2.3,scoreBoardMenu:GetTall() - h * 1.5)
 	muteallbut:SetSize(w, h)
-	muteallbut:SetText("Mute all")
+	muteallbut:SetText("Замутить всех")
 	
 	muteallbut.Paint = function(self,w,h)
-		surface.SetDrawColor( not hg.muteall and 255 or 0, hg.muteall and 255 or 0, 0, 128)
+		surface.SetDrawColor(
+			0,
+			not hg.muteall and 180 or 255,
+			0,
+			128
+		)
         surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 	end
 
@@ -558,10 +561,15 @@ function GM:ScoreboardShow()
 	local w, h = ScreenScale(30),ScreenScale(6)
 	mutespectbut:SetPos(scoreBoardMenu:GetWide()-w*1.2,scoreBoardMenu:GetTall() - h * 1.5)
 	mutespectbut:SetSize(w, h)
-	mutespectbut:SetText("Mute spectators")
+	mutespectbut:SetText("Замутить Спек")
 	
 	mutespectbut.Paint = function(self,w,h)
-		surface.SetDrawColor( not hg.mutespect and 255 or 0, hg.mutespect and 255 or 0, 0, 128)
+		surface.SetDrawColor(
+			0,
+			not hg.muteall and 180 or 255,
+			0,
+			128
+		)
         surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 	end
 
@@ -590,10 +598,10 @@ function GM:ScoreboardShow()
 		end 
 	end
 
-	local ServerName = GetHostName() or "ZCity | Developer Server | #01"
+	local ServerName = GetHostName() or "OT City | Developer Server | #01"
 	local tick
 	scoreBoardMenu.PaintOver = function(self,w,h)
-		surface.SetDrawColor( 255, 0, 0, 128)
+		surface.SetDrawColor(0, 180, 0, 128)
         surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 
 		surface.SetFont( "ZB_InterfaceLarge" )
@@ -613,18 +621,20 @@ function GM:ScoreboardShow()
 		surface.SetTextColor(col.r,col.g,col.b,col.a)
 		local lengthX, lengthY = surface.GetTextSize("Players:")
 		surface.SetTextPos(w / 4 - lengthX/2,ScreenScale(25))
-		surface.DrawText("Players:")
+		surface.DrawText("Игроки:")
 
 		surface.SetFont( "ZB_InterfaceMediumLarge" )
 		surface.SetTextColor(col.r,col.g,col.b,col.a)
 		local lengthX, lengthY = surface.GetTextSize("Spectators:")
 		surface.SetTextPos(w * 0.75 - lengthX/2,ScreenScale(25))
-		surface.DrawText("Spectators:")
-		tick = math.Round(LerpFT(0.1,tick or 0, 1 / engine.ServerFrameTime()))
-		local txt = "SV Tick: " .. tick
-		local lengthX, lengthY = surface.GetTextSize(txt)
-		surface.SetTextPos(w * 0.5 - lengthX/2,ScreenScale(25))
-		surface.DrawText(txt)
+		surface.DrawText("Наблюдающие:")
+		if LocalPlayer():IsAdmin() then
+			tick = math.Round(LerpFT(0.1, tick or 0, 1 / engine.ServerFrameTime()))
+			local txt = "Тикрейт: " .. tick
+			local lengthX, lengthY = surface.GetTextSize(txt)
+			surface.SetTextPos(w * 0.5 - lengthX/2, ScreenScale(25))
+			surface.DrawText(txt)
+		end
 	end
 	-- TEAMSELECTION
 	if LocalPlayer():Team() ~= TEAM_SPECTATOR then
@@ -642,13 +652,13 @@ function GM:ScoreboardShow()
 		end
 
 		SPECTATE.Paint = function(self,w,h)
-			surface.SetDrawColor( 255, 0, 0, 128)
+			surface.SetDrawColor(0, 180, 0, 128)
 			surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 			surface.SetFont( "ZB_InterfaceMedium" )
 			surface.SetTextColor(col.r,col.g,col.b,col.a)
 			local lengthX, lengthY = surface.GetTextSize("Join")
 			surface.SetTextPos( lengthX - lengthX/2, 2)
-			surface.DrawText("Join")
+			surface.DrawText("Зайти")
 		end
 	end
 
@@ -667,13 +677,13 @@ function GM:ScoreboardShow()
 		end
 
 		PLAYING.Paint = function(self,w,h)
-			surface.SetDrawColor( 255, 0, 0, 128)
-			surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
+			surface.SetDrawColor(0, 180, 0, 128)
+			surface.DrawOutlinedRect( 0, 0, w, h, 1.5 )
 			surface.SetFont( "ZB_InterfaceMedium" )
 			surface.SetTextColor(col.r,col.g,col.b,col.a)
 			local lengthX, lengthY = surface.GetTextSize("Join")
-			surface.SetTextPos( lengthX - lengthX/2, 2)
-			surface.DrawText("Join")
+			surface.SetTextPos( lengthX - lengthX/2, 1)
+			surface.DrawText("Зайти")
 		end
 	end
 
@@ -688,7 +698,7 @@ function GM:ScoreboardShow()
 		surface.SetDrawColor(0, 0, 0, 125)
 		surface.DrawRect(0, 0, w, h)
 
-		surface.SetDrawColor( 255, 0, 0, 128)
+		surface.SetDrawColor(0, 180, 0, 128)
         surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 	end
 
@@ -703,6 +713,29 @@ function GM:ScoreboardShow()
 		but:Dock(TOP)
 		but:DockMargin(8, 6, 8, -1)
 		but:SetText("")
+
+		local leftBar = vgui.Create("DPanel", but)
+		leftBar:Dock(LEFT)
+		leftBar:SetWide(ScreenScale(3))
+		leftBar:DockMargin(0, 0, ScreenScale(2), 0)
+		leftBar.Paint = function(self, w, h)
+			surface.SetDrawColor(255, 0, 0, 180)
+			surface.DrawRect(0, 0, w, h)
+		end
+
+		local avatarHolder = vgui.Create("DPanel", but)
+		avatarHolder:Dock(LEFT)
+		avatarHolder:DockMargin(0, ScreenScale(2), ScreenScale(6), ScreenScale(2))
+		avatarHolder.Paint = nil
+
+		local av = vgui.Create("AvatarImage", avatarHolder)
+		av:Dock(FILL)
+		av:SetPlayer(ply, 64)
+
+		but.PerformLayout = function(self, w, h)
+			local s = math.max(16, h - ScreenScale(4))
+			avatarHolder:SetWide(s)
+		end
 		
 		local soundButton = vgui.Create("DImageButton", but)
 		soundButton:Dock(RIGHT)
@@ -717,22 +750,69 @@ function GM:ScoreboardShow()
 	
 		but.Paint = function(self, w, h)
 			if not IsValid(ply) then return end
+
 			surface.SetDrawColor(colBlueUp.r, colBlueUp.g, colBlueUp.b, colBlueUp.a)
 			surface.DrawRect(0, 0, w, h)
 			surface.SetDrawColor(colBlue.r, colBlue.g, colBlue.b, colBlue.a)
 			surface.DrawRect(0, h / 2, w, h / 2)
-	
+
 			surface.SetFont("ZB_InterfaceMediumLarge")
+
+			local name = ply:Name() or "Disconnected"
+			local tag = ""
+			local tagColor = Color(200, 200, 200)
+			local outlineColor = Color(0, 0, 0)
+
+			-- Ранги
+			if ply:IsSuperAdmin() then
+				tag = " ◆ СА ◆"
+				tagColor = Color(212, 175, 55) -- тёмное золото
+				outlineColor = Color(40, 30, 0)
+			elseif ply:IsAdmin() then
+				tag = " ● АДМИН"
+				tagColor = Color(220, 60, 60)
+			elseif ply:GetUserGroup() == "moderator" then
+				tag = " ● МОДЕРАТОР"
+				tagColor = Color(70, 150, 255)
+			elseif ply:GetUserGroup() == "vip" then
+				tag = " ● VIP"
+				tagColor = Color(180, 90, 255) -- фиолетовый
+			else
+				tag = ""
+				tagColor = Color(170, 170, 170)
+			end
+
+			local textX = ScreenScale(3) + ScreenScale(2) + (h - ScreenScale(4)) + ScreenScale(6) + 8
+
+			-- Ник
 			surface.SetTextColor(col.r, col.g, col.b, col.a)
-			local lengthX, lengthY = surface.GetTextSize(ply:Name() or "He quited...")
-			surface.SetTextPos(15, h / 2 - lengthY / 2)
-			surface.DrawText(ply:Name() or "He quited...")
-	
-			surface.SetFont("ZB_InterfaceMediumLarge")
+			local nameW, nameH = surface.GetTextSize(name)
+			surface.SetTextPos(textX, h / 2 - nameH / 2)
+			surface.DrawText(name)
+
+			-- Тег
+			if tag ~= "" then
+				local tagX = textX + nameW
+				local tagY = h / 2 - nameH / 2
+
+				-- Обводка для SuperAdmin
+				if ply:IsSuperAdmin() then
+					surface.SetTextColor(outlineColor)
+					surface.SetTextPos(tagX + 1, tagY + 1)
+					surface.DrawText(tag)
+				end
+
+				surface.SetTextColor(tagColor)
+				surface.SetTextPos(tagX, tagY)
+				surface.DrawText(tag)
+			end
+
+			-- Пинг
+			local ping = tostring(ply:Ping() or "0")
+			local lengthX, lengthY = surface.GetTextSize(ping)
 			surface.SetTextColor(col.r, col.g, col.b, col.a)
-			local lengthX, lengthY = surface.GetTextSize(ply:Ping() or "He quited...")
 			surface.SetTextPos(w - lengthX - 15, h / 2 - lengthY / 2)
-			surface.DrawText(ply:Ping() or "He quited...")
+			surface.DrawText(ping)
 		end
 
 		function but:DoClick()
@@ -743,10 +823,10 @@ function GM:ScoreboardShow()
 		function but:DoRightClick()
 			--if ply:IsBot() then chat.AddText(Color(255,0,0), "no, you can't") return end
 			local Menu = DermaMenu()
-			Menu:AddOption( "Account", function(self)
+			Menu:AddOption( "Аккаунт", function(self)
 				zb.Experience.AccountMenu( ply )
 			end)
-			Menu:AddOption( "Copy SteamID", function(self)
+			Menu:AddOption( "Скопировать SteamID", function(self)
 				SetClipboardText(ply:SteamID())
 			end)
 
@@ -765,7 +845,7 @@ function GM:ScoreboardShow()
 		surface.SetDrawColor(0, 0, 0, 125)
 		surface.DrawRect(0, 0, w, h)
 
-		surface.SetDrawColor( 255, 0, 0, 128)
+		surface.SetDrawColor(0, 180, 0, 128)
         surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 	end
 
@@ -780,6 +860,29 @@ function GM:ScoreboardShow()
 		but:DockMargin( 8, 6, 8, -1 )
 		but:SetText("")
 
+		local leftBar = vgui.Create("DPanel", but)
+		leftBar:Dock(LEFT)
+		leftBar:SetWide(ScreenScale(3))
+		leftBar:DockMargin(0, 0, ScreenScale(2), 0)
+		leftBar.Paint = function(self, w, h)
+			surface.SetDrawColor(120, 120, 120, 180)
+			surface.DrawRect(0, 0, w, h)
+		end
+
+		local avatarHolder = vgui.Create("DPanel", but)
+		avatarHolder:Dock(LEFT)
+		avatarHolder:DockMargin(0, ScreenScale(2), ScreenScale(6), ScreenScale(2))
+		avatarHolder.Paint = nil
+
+		local av = vgui.Create("AvatarImage", avatarHolder)
+		av:Dock(FILL)
+		av:SetPlayer(ply, 64)
+
+		but.PerformLayout = function(self, w, h)
+			local s = math.max(16, h - ScreenScale(4))
+			avatarHolder:SetWide(s)
+		end
+
 		local soundButton = vgui.Create("DImageButton", but)
 		soundButton:Dock(RIGHT)
 		soundButton:SetSize( 30, 0 )
@@ -791,24 +894,73 @@ function GM:ScoreboardShow()
 		end
 		ply.soundButton = soundButton
 
-		but.Paint = function(self,w,h)
+		but.Paint = function(self, w, h)
 			if not IsValid(ply) then return end
-			surface.SetDrawColor(colSpect2.r,colSpect2.g,colSpect2.b,colSpect2.a)
-			surface.DrawRect(0,0,w,h)
-			surface.SetDrawColor(colSpect1.r,colSpect1.g,colSpect1.b,colSpect1.a)
-			surface.DrawRect(0,h/2,w,h/2)
 
-			surface.SetFont( "ZB_InterfaceMediumLarge" )
-			surface.SetTextColor(col.r,col.g,col.b,col.a)
-			local lengthX, lengthY = surface.GetTextSize( ply:Name() or "He quited..." )
-			surface.SetTextPos(15,h/2 - lengthY/2)
-			surface.DrawText(ply:Name() or "He quited...")
+			surface.SetDrawColor(colSpect2.r, colSpect2.g, colSpect2.b, colSpect2.a)
+			surface.DrawRect(0, 0, w, h)
+			surface.SetDrawColor(colSpect1.r, colSpect1.g, colSpect1.b, colSpect1.a)
+			surface.DrawRect(0, h / 2, w, h / 2)
 
-			surface.SetFont( "ZB_InterfaceMediumLarge" )
-			surface.SetTextColor(col.r,col.g,col.b,col.a)
-			local lengthX, lengthY = surface.GetTextSize( ply:Ping() or "He quited..." )
-			surface.SetTextPos(w - lengthX -15,h/2 - lengthY/2)
-			surface.DrawText(ply:Ping() or "He quited...")
+			surface.SetFont("ZB_InterfaceMediumLarge")
+
+			local name = ply:Name() or "He quited..."
+			local tag = ""
+			local tagColor = Color(170, 170, 170)
+			local outlineColor = Color(0, 0, 0)
+
+			local group = string.lower(ply:GetUserGroup() or "")
+
+			-- Ранги (как ты просил)
+			if ply:IsSuperAdmin() then
+				tag = " ◆ СА ◆"
+				tagColor = Color(212, 175, 55) -- тёмное золото
+				outlineColor = Color(40, 30, 0)
+			elseif ply:IsAdmin() then
+				tag = " ● АДМИН"
+				tagColor = Color(220, 60, 60)
+			elseif ply:GetUserGroup() == "moderator" then
+				tag = " ● МОДЕРАТОР"
+				tagColor = Color(70, 150, 255)
+			elseif ply:GetUserGroup() == "vip" then
+				tag = " ● VIP"
+				tagColor = Color(180, 90, 255) -- фиолетовый
+			else
+				tag = ""
+				tagColor = Color(170, 170, 170)
+			end
+
+			local textX = ScreenScale(3) + ScreenScale(2) + (h - ScreenScale(4)) + ScreenScale(6) + 8
+
+			-- Ник
+			surface.SetTextColor(col.r, col.g, col.b, col.a)
+			local nameW, nameH = surface.GetTextSize(name)
+			surface.SetTextPos(textX, h / 2 - nameH / 2)
+			surface.DrawText(name)
+
+			-- Тег (с обводкой для СА)
+			if tag ~= "" then
+				local tagX = textX + nameW
+				local tagY = h / 2 - nameH / 2
+
+				if ply:IsSuperAdmin() then
+					surface.SetTextColor(outlineColor.r, outlineColor.g, outlineColor.b, col.a)
+					surface.SetTextPos(tagX + 1, tagY + 1)
+					surface.DrawText(tag)
+				end
+
+				surface.SetTextColor(tagColor.r, tagColor.g, tagColor.b, col.a)
+				surface.SetTextPos(tagX, tagY)
+				surface.DrawText(tag)
+			end
+
+			-- Пинг
+			local ping = tostring(ply:Ping() or "0")
+			surface.SetFont("ZB_InterfaceMediumLarge")
+			surface.SetTextColor(col.r, col.g, col.b, col.a)
+			local lengthX, lengthY = surface.GetTextSize(ping)
+			surface.SetTextPos(w - lengthX - 15, h / 2 - lengthY / 2)
+			surface.DrawText(ping)
 		end
 
 		function but:DoClick()
@@ -819,10 +971,10 @@ function GM:ScoreboardShow()
 		function but:DoRightClick()
 			--if ply:IsBot() then chat.AddText(Color(255,0,0), "no, you can't") return end
 			local Menu = DermaMenu()
-			Menu:AddOption( "Account", function(self)
+			Menu:AddOption( "Аккаунт", function(self)
 				zb.Experience.AccountMenu( ply )
 			end)
-			Menu:AddOption( "Copy SteamID", function(self)
+			Menu:AddOption( "Скопировать SteamID", function(self)
 				SetClipboardText(ply:SteamID())
 			end)
 			--Menu:AddOption( "Medal", function(self) 
@@ -847,8 +999,8 @@ function GM:ScoreboardHide()
 		scoreBoardMenu = nil
 	end
 end
-local AdminShowVoiceChat = CreateClientConVar("zb_admin_show_voicechat","0",false,false,"Show voicechat panels for admins",0,1)
-hook.Add("PlayerStartVoice", "showVoicePanels", function(ply)
+local AdminShowVoiceChat = CreateClientConVar("zb_admin_show_voicechat","0",false,false,"Shows voicechat panles",0,1)
+hook.Add("PlayerStartVoice", "asd", function(ply)
 	if !IsValid(ply) then return end
 	if LocalPlayer():IsAdmin() and AdminShowVoiceChat:GetBool() then return end
 

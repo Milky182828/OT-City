@@ -8,8 +8,8 @@ function zb.AddFade()
 	net.Broadcast()
 end
 
-local forcemodeconvar = CreateConVar("zb_forcemode", "random", nil, "Set force mode (set to 'random' to disable)")
-forcemodeconvar:SetString("random")
+local forcemodeconvar = CreateConVar("zb_forcemode", "", FCVAR_ARCHIVE)
+
 function zb:GetMode(round)
 	if zb.modes[round] then return round end
 
@@ -133,7 +133,7 @@ function zb:EndRoundThink()
 			zb.END_TIME = (CurTime() + (CurrentRound().end_time or 5))
 			if zb.nextround == "coop" and GetGlobalVar("coop_first_round_timer", 0) == 0 then
 
-				zb.END_TIME = (CurTime() + (GetConVar("zb_dev") and 5 or 60))
+				zb.END_TIME = (CurTime() + 60)
 				SetGlobalVar("coop_first_round_timer", zb.END_TIME)
 			end
 		end
@@ -316,7 +316,7 @@ function zb.GetModesPlaytime()
 	local newtbl = {}
 	local count = 0
 
-	for i, name in ipairs(tbl) do
+	for i,name in ipairs(tbl) do
 		local amt = zb.ModesPlaytime[name] or 0
 		newtbl[name] = amt
 		count = count + amt
@@ -351,21 +351,25 @@ end
 
 zb.ModesChances = zb.ModesChances or {}
 
-function zb.GetChance(name, addtbl)
+function zb.GetChance(name, modes, amtplayed)
 	local mode = zb:GetMode(name)
 	local tbl = zb.modes[mode]
 
+	local frequency_played = modes and amtplayed and modes[name] and modes[name] / amtplayed
+
 	local newtbl = tbl.Types and tbl.Types[name] or tbl
 
-	return newtbl.ChanceFunction and newtbl:ChanceFunction(addtbl or {}) or newtbl.Chance or 0.1
+	return newtbl.ChanceFunction and newtbl:ChanceFunction() or newtbl.Chance or 0.1
 end
 
 function zb.GetModesChances()
 	local tbl = zb.GetAvailableModes()
 	local newtbl = {}
 
+	local modes, amtplayed = zb.GetModesPlaytime()
+
 	for i, name in pairs(tbl) do
-		newtbl[name] = zb.GetChance(name)
+		newtbl[name] = zb.GetChance(name, modes, amtplayed)
 	end
 
 	return newtbl
@@ -374,18 +378,16 @@ end
 function zb.WeightedChanceMode(modes_chances)
 	local weight = 0
 
-	local newchancestbl = {}
 	for name, chance in pairs(modes_chances) do
-		local newchance = zb.GetChance(name, {rounds = zb.RoundList}) or chance
-		newchancestbl[name] = newchance
-		weight = weight + newchance * 100
+		local played = modes_chances[name]
+		weight = weight + chance * 100
 	end
 
 	local random = math.random(weight)
 
 	local count = 0
 	for name, chance in RandomPairs(modes_chances) do
-		count = count + (newchancestbl[name] or chance) * 100
+		count = count + chance * 100
 
 		if count >= random then
 			return name
@@ -432,7 +434,7 @@ function zb.CheckChances()
 	end
 
 	local nextrnd = zb.nextround or zb.RoundList[1]
-	print("Next round is: "..zb.GetRoundName(nextrnd).." ("..nextrnd..")")
+	print("Следуйщий Рауд: "..zb.GetRoundName(nextrnd).." ("..nextrnd..")")
 
 	if #zb.QueuedModes > 0 then
 		print("Queued game modes:")
@@ -452,13 +454,12 @@ function zb.RerollChances()
 	local chances = zb.GetModesChances()
 
 	for i = 1, 20 do
-		local round = zb.WeightedChanceMode(chances)
-
-		zb.RoundList[i] = round
+		zb.RoundList[i] = zb.WeightedChanceMode(chances)
 	end
 
 	zb.nextround = table.remove(zb.RoundList, 1)
 end
+
 
 function zb.GetModesInfo()
 	local modesInfo = {}
@@ -597,7 +598,7 @@ function zb:RoundStart()
 
 	local currentMode = mode.Type or round
 
-	print("Next game mode is " .. nextMode)
+	print("Следующий режим игры " .. nextMode)
 
 	NextRound(forcemode ~= "random" and forcemode or (nextMode or "hmcd"))
 
@@ -644,7 +645,7 @@ net.Receive("AdminSetGameMode", function(len, ply)
 
 	if command == "setmode" then
 		NextRound(modeKey)
-		ply:ChatPrint("Game mode set to: " .. modeKey)
+		ply:ChatPrint("Режим игры установлен на: " .. modeKey)
 
 		if addToQueue then
 			table.insert(zb.QueuedModes, modeKey)
@@ -669,7 +670,7 @@ end)
 net.Receive("AdminEndRound", function(len, ply)
 	if not ply:IsAdmin() then return end
 
-	ply:ChatPrint("Round ended!")
+	ply:ChatPrint("Раунд окончен!")
 	zb:EndRound()
 end)
 
@@ -748,7 +749,7 @@ end
 
 COMMANDS.setmode = {
 	function(ply, args)
-		if not ply:IsAdmin() then ply:ChatPrint("You don't have access") return end
+		if not ply:IsAdmin() then ply:ChatPrint("У тебя нет доступа") return end
 		if not args[1] or (not zb:GetMode(args[1]) and args[1]~="random") then return end
 		ply:ChatPrint(args[1])
 		NextRound(args[1])
@@ -758,25 +759,22 @@ COMMANDS.setmode = {
 
 COMMANDS.setforcemode = {
 	function(ply, args)
-		if not ply:IsAdmin() then ply:ChatPrint("You don't have access") return end
+		if not ply:IsAdmin() then ply:ChatPrint("У тебя нет доступа") return end
 		if not args[1] or (not zb:GetMode(args[1]) and args[1]~="random") then return end
 		ply:ChatPrint(args[1])
 		forcemode = args[1]
 		if args[1] ~= "random" then
 			NextRound(args[1])
 		end
-	end, 0
+	end,
+	0
 }
 
-COMMANDS.endround = {
-	function(ply, args)
-		if not ply:IsAdmin() then
-			ply:ChatPrint("You don't have access")
-			return
-		end
+COMMANDS.endround = {function(ply, args)
+	if not ply:IsAdmin() then ply:ChatPrint("У тебя нет доступа") return end
 	 	zb:EndRound()
-	end, 0
-}
+	end,
+	0}
 
 if SERVER then
 	util.AddNetworkString("SendAvailableModes")

@@ -104,7 +104,7 @@ end
 
 function TOOL.BuildCPanel(CPanel)
 	CPanel:AddControl("Header", {
-		Description = "LMB to add point,\nRMB to remove nearest point" -- ура удобный инструмент я в шоке!!
+		Description = "ура удобный инструмент я в шоке!!"
 	})
 
 	local dlist = vgui.Create("DListView")
@@ -112,7 +112,7 @@ function TOOL.BuildCPanel(CPanel)
 	dlist:SetTall(ScreenScale(100))
 	dlist:AddColumn("Point Name")
 
-	for k, _ in SortedPairs(zb.Points) do
+	for k, _ in pairs(zb.Points) do
 		dlist:AddLine(k)
 	end
 
@@ -136,15 +136,15 @@ function TOOL:Deploy()
 end
 
 local red = Color(255, 0, 0, 100)
+
 function TOOL:DrawHUD()
-	local lply = LocalPlayer()
-	if not lply:IsAdmin() then return end
+	if not LocalPlayer():IsAdmin() then return end
 
 	local radius = 4
 	local wideSteps = 10
 	local tallSteps = 10
 
-	local angeye = lply:EyeAngles()
+	local angeye = LocalPlayer():EyeAngles()
 	angeye:RotateAroundAxis(angeye:Forward(), 90)
 	angeye:RotateAroundAxis(angeye:Right(), 90)
 
@@ -175,7 +175,7 @@ function TOOL:DrawHUD()
 			end
 
 			local data = pos:ToScreen()
-			local distance = lply:GetPos():Distance(pos)
+			local distance = LocalPlayer():GetPos():Distance(pos)
 			local factor = 1 - math.Clamp(distance / 4096, 0, 1)
 			local alpha = math.max(255 * factor, 20)
 
@@ -190,7 +190,7 @@ function TOOL:DrawHUD()
 	end
 
 	if self.IsHolding then
-		local ply = lply
+		local ply = LocalPlayer()
 		local trace2 = util.QuickTrace(EyePos(), EyeAngles():Forward() * 1000, ply)
 
 		cam.Start3D()
@@ -202,7 +202,8 @@ function TOOL:DrawHUD()
 	end
 end
 
-local clr, point_editor = Color(20, 20, 20), GetConVar("point_editor_point")
+local clr = Color(20, 20, 20)
+
 function TOOL:DrawToolScreen(width, height)
 	surface.SetDrawColor(clr)
 	surface.DrawRect(0, 0, width, height)
@@ -210,7 +211,7 @@ function TOOL:DrawToolScreen(width, height)
 	draw.SimpleText("#PLUVERS", "ZB_ScrappersMedium", width / 2, height / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 
 	local ply = self:GetOwner()
-	if ply:GetInfo("point_editor_point") == "" or !point_editor then return end
+	if ply:GetInfo("point_editor_point") == "" then return end
 
-	draw.SimpleText(point_editor:GetString(), "ZB_ScrappersSmall", width / 2, height * 0.7, zb.Points[point_editor:GetString()].Color or color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+	draw.SimpleText(GetConVar("point_editor_point"):GetString(), "ZB_ScrappersSmall", width / 2, height * 0.7, zb.Points[GetConVar("point_editor_point"):GetString()].Color or color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 end

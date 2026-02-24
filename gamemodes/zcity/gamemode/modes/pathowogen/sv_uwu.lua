@@ -1,5 +1,5 @@
 MODE.name = "pathowogen"
-MODE.PrintName = "Pathowogen :3"
+MODE.PrintName = "Фуриебы заценят :3"
 MODE.start_time = 0
 MODE.end_time = 10
 
@@ -830,7 +830,7 @@ function MODE:PlayerDeath(ply, inflictor, att)
 		if last_attacker then
 			if math.random(1, 3) == 1 then
 				if last_attacker.PlayerClassName != "furry" then
-					last_attacker:Notify(killfurries[math.random(#killfurries)])
+					last_attacker:Notify(table.Random(killfurries))
 				end
 			end
 		end

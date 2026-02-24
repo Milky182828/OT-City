@@ -14,7 +14,7 @@ if CLIENT then
 	    local wep = ply:GetActiveWeapon()
 	    local type_ = math.Round(args[1])
 	    if wep and ishgweapon(wep) and (wep:Clip1() == 0 or wep.AllwaysChangeAmmo) and wep:CanUse() and wep.AmmoTypes and wep.AmmoTypes[type_] then
-	        ply:ChatPrint("Changed ammotype to: " .. wep.AmmoTypes[type_][1])
+	        ply:ChatPrint("Тип боеприпасов изменён на: " .. wep.AmmoTypes[type_][1])
 	        net.Start("changeAmmoType")
 	        net.WriteEntity(wep)
 	        net.WriteInt(type_, 4)
@@ -63,34 +63,35 @@ else
 	end)
 end
 
-hg.postures = {
-    [0] = "Regular hold",
-    [1] = "Hipfire",
-    [2] = "Left shoulder",
-    [3] = "High ready",
-    [4] = "Low ready",
-    [5] = "Point shooting",
-    [6] = "Shooting from cover",
-    [7] = {"Gangsta",isPistolOnly = true},
-    [8] = {"One-handed",isPistolOnly = true},
-	[9] = "Somalian",
-}
-
 if CLIENT then
 	local printed
 
+	hg.postures = {
+        [0] = "Обычный хват",
+        [1] = "Стрельба с бедра",
+        [2] = "С левого плеча",
+        [3] = "Высокая готовность",
+        [4] = "Низкая готовность",
+        [5] = "Точечная стрельба",
+        [6] = "Стрельба из укрытия",
+        [7] = "Гангстерский стиль",
+        [8] = "Одной рукой",
+        [9] = "Сомалийский стиль",
+
+    }
+
 	concommand.Add("hg_change_posture", function(ply, cmd, args)
-		if not args[1] and not isnumber(args[1]) and not printed then print([[Change your gun posture:
-0 - regular hold
-1 - hipfire
-2 - left shoulder
-3 - high ready
-4 - low ready
-5 - point shooting
-6 - shooting from cover
-7 - gangsta shooting
-8 - one-handed shooting
-9 - somalian shooting
+		if not args[1] and not isnumber(args[1]) and not printed then print([[Сменить стойку оружия:
+0 - Обычный хват  
+1 - Стрельба с бедра  
+2 - С левого плеча  
+3 - Высокая готовность  
+4 - Низкая готовность  
+5 - Точечная стрельба  
+6 - Стрельба из укрытия  
+7 - Гангстерская стрельба  
+8 - Стрельба одной рукой  
+9 - Сомалийская стрельба
 ]]) printed = true end
 		local pos = math.Round(args[1] or -1)
 		net.Start("change_posture")
@@ -112,21 +113,16 @@ else
 		if (ply.change_posture_cooldown or 0) > CurTime() then return end
 		ply.change_posture_cooldown = CurTime() + 0.1
 
-		local gun = ply:GetActiveWeapon()
-		if IsValid(gun) and ishgweapon(gun) then
-			ply:EmitSound("weapons/zmirli/shared/foley_light" .. math.random(1,4) .. ".wav", 45, math.random(95,105))
-		end
-
-		if pos ~= -1 then
+		if pos ~= -1 then 
 			if pos == ply.posture then
 				ply.posture = 0
 				pos = 0
 			else
-				ply.posture = pos
+				ply.posture = pos 
 			end
 		else
 			ply.posture = ply.posture or 0
-			ply.posture = (ply.posture + 1) > #hg.postures and 0 or ply.posture + 1
+			ply.posture = (ply.posture + 1) >= 9 and 0 or ply.posture + 1
 		end
 		net.Start("change_posture")
 		net.WriteEntity(ply)
@@ -169,7 +165,7 @@ if CLIENT then
 
 				return 0
 			end,
-			[2] = "Attachments Menu"
+			[2] = "Меню модификаций"
 		}
 
         if !IsValid(wep) or !ishgweapon(wep) then
@@ -189,15 +185,12 @@ if CLIENT then
                         local tbl2 = {}
 
                         for i, str in pairs(hg.postures) do -- DO. NOT. CHANGE. TO. IPAIRS. kthxbye
-							if istable(str) then
-								if str.isPistolOnly and !wep:IsPistolHoldType() then continue end
-							end
                             tbl2[#tbl2 + 1] = {
                                 [1] = function()
                                     RunConsoleCommand("hg_change_posture", i)
 
                                 end,
-                                [2] = istable(str) and str[1] or str
+                                [2] = str
                             }
                         end
 
@@ -206,13 +199,13 @@ if CLIENT then
 
                     return -1
                 end,
-                [2] = "Change Posture\n(MOUSE2 to select)" 
+                [2] = "Сменить стойку\n(MOUSE2 для выбора)" 
             },
             [2] = {
                 [1] = function()
                     RunConsoleCommand("hg_change_posture", 0)
                 end,
-                [2] = "Reset Posture"
+                [2] = "Сбросить стойку"
             },
 			[3] = attmenu,
         }
@@ -228,14 +221,14 @@ if CLIENT then
             
             local drum1 = {}
             for i = 1, #drum do
-                drum1[i] = "Slot №"..tostring(i)
+                drum1[i] = "Слот №"..tostring(i)
             end
         
             local tbl4 = {
                 function(mouseClick, val)
                     RunConsoleCommand("hg_insertbullet", val)
                 end,
-                "Load one bullet",
+                "Загрузить один патрон",
                 true,
                 drum1
             }
@@ -248,7 +241,7 @@ if CLIENT then
                 [1] = function()
                     RunConsoleCommand("hg_inspect")
                 end,
-                [2] = "Inspect" 
+                [2] = "Осмотр оружия" 
             }
         end
 
@@ -257,7 +250,7 @@ if CLIENT then
                 [1] = function()
                     RunConsoleCommand("hg_unload_ammo", 0)
                 end,
-                [2] = "Unload" 
+                [2] = "Разгрузить" 
             }
         elseif (wep:Clip1() == 0 or wep.AllwaysChangeAmmo) and wep.AmmoTypes and not wep.reload then
             local ammotypes = {}
@@ -270,7 +263,7 @@ if CLIENT then
                 function(mouseClick, chosen)
                     RunConsoleCommand("hg_change_ammotype", chosen) 
                 end,
-                "Change Ammo Type",
+                "Сменить тип патронов",
                 true,
                 ammotypes
             }
@@ -282,7 +275,7 @@ if CLIENT then
                 [1] = function()
                     RunConsoleCommand("hmcd_togglelaser")
                 end,
-                [2] = "Toggle Laser" 
+                [2] = "Переключить лазер" 
             }
 		end
 
@@ -292,7 +285,7 @@ if CLIENT then
 
                 return -1
             end,
-            [2] = "Weapon Manipulations Menu"
+            [2] = "Меню манипуляций с оружием"
         }
     end)
 end

@@ -274,6 +274,7 @@ hook.Add("radialOptions", "DislocatedJaw", function()
 end)
 
 hook.Add("PostRender", "screenshot_think", function()
+	do return end
 	local org = lply.organism
 	
 	if not org or not org.brain or org.otrub or !lply:Alive() then return end
@@ -313,7 +314,8 @@ local braindeathstart = CurTime() + 20
 local lerpedpart = 0
 local lerpedbrain = 0
 
-hook.Add("Post Post Pre Post Processing", "ShowScreens", function()
+hook.Add("Post Pre Post Processing", "ShowScreens", function()
+	do return end
 	local org = lply.organism
 	
 	if !lply:Alive() then return end
@@ -334,7 +336,7 @@ hook.Add("Post Post Pre Post Processing", "ShowScreens", function()
 			surface.SetDrawColor(255, 255, 255, math.Clamp(lerpedpart * 50, 0, 255))
 			surface.SetMaterial(screens[curscreen])
 			surface.DrawTexturedRect(0, 0, ScrW(), ScrH())
-			
+
 			DrawToyTown(4, ScrH())
 		else
 			if switch then
@@ -403,15 +405,23 @@ hook.Add("RenderScreenspaceEffects", "organism-effects", function()
 
 	--print(lply.tinnitus)
 	local adrenK = math.min(math.max(1 + adrenaline, 1), 1.2)
+	
+	if lply.suiciding and lply:Alive() then
+		lply:SetDSP(130)
+		olddspchange = true
+	else
+		if olddspchange then
+			lply:SetDSP(0)
+			olddspchange = false
+		end
+	end
 
 	if org.otrub then
 		//DrawMotionBlur(0.1, 1., 0.1)
 		//lply:ScreenFade( SCREENFADE.IN, clr_black2, 2, 0.5 )
 	end
-	
-	lply:SetDSP(0)
 
-	if otrub or ((fakeTimer and fakeTimer - 2 > CurTime()) and GetConVar("hg_deathfadeout"):GetBool()) then
+	if otrub or (fakeTimer and fakeTimer - 2 > CurTime()) then
 		--if otrub or (fakeTimer and fakeTimer - 2 > CurTime()) then
 		clr_black1.a = math.Clamp(pain / 50 * 255, 250, 255)
 		//lply:ScreenFade( SCREENFADE.IN, clr_black2, 2, 0.5 )
@@ -430,7 +440,7 @@ hook.Add("RenderScreenspaceEffects", "organism-effects", function()
 		if ((disorientation and disorientation > 3) or (brain and brain > 0.2) or lply.PlayerClassName == "headcrabzombie" or lply:GetNetVar("headcrab")) and lply:Alive() then
 			lply:SetDSP(130)
 		else
-			lply:SetDSP((lply.suiciding and lply:Alive()) and 130 or 0)
+			lply:SetDSP(0)
 		end
 	end
 
@@ -451,7 +461,7 @@ hook.Add("RenderScreenspaceEffects", "organism-effects", function()
 
 	local amount = 1 - math.Clamp(lowpulse + disorientation / 4 + k2 * 2,0,1)
 
-	disorientationLerp = LerpFT(disorientation > disorientationLerp and 1 or 0.01, disorientationLerp, math.max(lply.suiciding and 1.5 or 0, disorientation))
+	disorientationLerp = LerpFT(disorientation > disorientationLerp and 1 or 0.01, disorientationLerp, disorientation)
 
 	if (disorientationLerp > 1) and lply:Alive() or brain > 0 then
 		local add2 = disorientationLerp - 1
@@ -742,8 +752,7 @@ hook.Add("Player-Ragdoll think", "organism-think-client-blood", function(ply, en
 				org.breathed = true
 				local heartbeat = org.heartbeat or 0
 				local muffed
-				local pitch = math.Clamp(heartbeat / 250 * 100, 90, 120) * math.Clamp((org.stamina and org.stamina[1] and (1 + (1 - org.stamina[1] / 180) * 0.2) or 1), 1, 1.2)
-
+				
 				if ent.armors then
 					muffed = ent.armors["face"] == "mask2" or ent.PlayerClassName == "Combine"
 				end
@@ -757,7 +766,7 @@ hook.Add("Player-Ragdoll think", "organism-think-client-blood", function(ply, en
 					pitchadd = pitchAddClasses[ply.PlayerClassName]
 				end
 
-				ent:EmitSound("snds_jack_hmcd_breathing/" .. (ThatPlyIsFemale(ent) and "f" or "m") .. math.random(4) .. ".wav", min(heartbeat * 1.0 / ( muffed and 2.5 or 4), 45), pitch + pitchadd, 0.5 * (((org.stamina and org.stamina[1] and org.stamina[1] < 160)) and 1 or org.heartbeat > 140 and 0.25 or 0.05), CHAN_AUTO, 0, muffed and 16 or 0)
+				ent:EmitSound("snds_jack_hmcd_breathing/" .. (ThatPlyIsFemale(ent) and "f" or "m") .. math.random(4) .. ".wav", min(heartbeat * 1.0 / ( muffed and 2.5 or 4), 45), math.random(95, 105) + pitchadd, 0.5 * (((org.stamina and org.stamina[1] and org.stamina[1] < 160) or org.heartbeat > 140) and 1 or 0.05), CHAN_AUTO, 0, muffed and 16 or 0)
 			elseif org.breathed and sin >= 0.1 then
 				org.breathed = false
 			end

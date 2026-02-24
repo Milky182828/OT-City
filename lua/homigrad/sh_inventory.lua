@@ -26,7 +26,7 @@ if CLIENT then
 		OpenInv(ent)
 	end)
 
-	local colRed = Color(255, 0, 0, 255)
+	local colRed = Color(0, 243, 93)
 	local colBlack2 = Color(100, 100, 100)
 	local colBlack3 = Color(50, 50, 50, 120)
 	local colBlue = Color(150, 150, 150)
@@ -146,7 +146,6 @@ if CLIENT then
 		end
 	end)
 
-	local clr_text = Color(255,255,255,45)
 	OpenInv = function(ent)
 		if IsValid(plyMenu) then
 			plyMenu:Remove()
@@ -166,14 +165,8 @@ if CLIENT then
 		local armor = ent:GetNetVar("Armor")
 		inv["Armor"] = armor
 		if not inv then return end
-
-		local nameStr = "Unknown"
-		if IsValid(ent) then
-			if (ent:IsPlayer() or ent:IsRagdoll()) then
-				nameStr = ent:GetPlayerName() or string.NiceName(ent:GetClass())
-			end
-		end
-		local name = nameStr .. "'s inventory" or "Container"
+		
+		local name = IsValid(ent) and (ent:IsPlayer() or ent:IsRagdoll()) and ent:GetPlayerName().. "'инвентарь" or "Контейнер"
 		local sizeX, sizeY = ScrW() / 3, ScrH() / 2.5
 		plyMenu = vgui.Create("ZFrame")
 		plyMenu.ent = ent
@@ -189,9 +182,10 @@ if CLIENT then
 		plyMenu.Created = CurTime()
 		--plyMenu.OldPaint = 
 		plyMenu.PaintOver = function(self, w, h)
+
 			draw.DrawText(name, "HomigradFontSmall", w / 2, 10, color_white, TEXT_ALIGN_CENTER)
 
-			draw.DrawText("R - Close | LMB - Take | RMB - Item menu", "HomigradFontSmall", w / 2, h - h*0.055 , clr_text, TEXT_ALIGN_CENTER)
+			draw.DrawText("R - Закрыть | LMB - Взять | RMB - Меню предмета", "HomigradFontSmall", w / 2, h - h*0.055 , Color(255,255,255,45), TEXT_ALIGN_CENTER)
 		end
 		function plyMenu:Think()
 			local ent = self.ent
@@ -251,7 +245,7 @@ if CLIENT then
 		end
 		local time = CurTime() + 3
 		function DScrollPanel:Paint(w, h)
-			txt = "Searching"
+			txt = "Идет поиск"
 			if time > 0 then
 				for i = 1, 3 - math.Round(time-CurTime(),0) do
 					txt = txt .. "."
@@ -260,7 +254,7 @@ if CLIENT then
 					time = CurTime() + 3
 				end
 			end
-			draw.DrawText((plyMenu.Created + count + 3) < CurTime() and "" or txt, "ZCity_Small", w / 2, h / 2.8, Color(255,255,255,15), TEXT_ALIGN_CENTER)
+			draw.DrawText((plyMenu.Created + count + 3) < CurTime() and "" or txt, "ZCity_Small", w / 2, h / 2.8, Color(73,158,77,15), TEXT_ALIGN_CENTER)
 		end
 		local count2 = 0
 		
@@ -309,7 +303,7 @@ if CLIENT then
 					
 					if not functions[tab](ply, ent, i, unpack(thing1)) then
 						local OptionsMenu = DermaMenu() 
-							OptionsMenu:AddOption( "You have item like this", function() end )
+							OptionsMenu:AddOption( "У тебя уже есть такой предмет", function() end )
 						OptionsMenu:Open()
 						return
 					end
@@ -334,7 +328,7 @@ if CLIENT then
 					
 					if not functions[tab](ply, ent, i, unpack(thing1)) then
 						local OptionsMenu = DermaMenu() 
-							OptionsMenu:AddOption( "You have item like this", function() end )
+							OptionsMenu:AddOption( "У тебя уже есть такой предмет", function() end )
 						OptionsMenu:Open()
 						return
 					end
@@ -346,7 +340,7 @@ if CLIENT then
 					grid.SoundKD = CurTime() + 0.2
 					--button:Remove()
 					local OptionsMenu = DermaMenu() 
-						OptionsMenu:AddOption( "Take", function() button:Remove() TakeItem(tab, i, thing, ent) end )
+						OptionsMenu:AddOption( "Взять", function() button:Remove() TakeItem(tab, i, thing, ent) end )
 					OptionsMenu:Open()
 					--timer.Simple(0.5 * math.max(ply:Ping() / 50,1),function()
 					--	--OpenInv(ent)

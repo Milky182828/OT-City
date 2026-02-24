@@ -17,12 +17,12 @@ local models = {
 }
 
 local ranks = {
-    {name = "Chief", chance = 5},
-    {name = "Cmdr.", chance = 5},
-    {name = "Cpt.", chance = 15},
-    {name = "Lt.", chance = 35},
-    {name = "Sgt.", chance = 45},
-    {name = "Officer", chance = 80}
+    {name = "Шеф", chance = 5},
+    {name = "Командир.", chance = 5},
+    {name = "Капитан.", chance = 15},
+    {name = "Лейтенант.", chance = 35},
+    {name = "Сержант.", chance = 45},
+    {name = "Офицер", chance = 80}
 }
 
 local clr = Color(10, 10, 100):ToVector()
@@ -35,7 +35,7 @@ function CLASS.On(self)
 
     local randomValue = math.random(100)
     local cumulativeChance = 0
-    local rank = "Officer"
+    local rank = "Офицер"
 
     for _, rankInfo in ipairs(ranks) do
         cumulativeChance = cumulativeChance + rankInfo.chance

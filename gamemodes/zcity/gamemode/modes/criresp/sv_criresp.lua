@@ -1,5 +1,5 @@
 MODE.name = "criresp"
-MODE.PrintName = "Crisis Response"
+MODE.PrintName = "Срочный вызов"
 
 MODE.ForBigMaps = false
 MODE.ROUND_TIME = 480
@@ -24,15 +24,15 @@ function MODE:AssignTeams()
 	local numSWAT = 1
 
 	if numPlayers <= 4 then
-		numSWAT = 1
+		numSWAT = 2
 	elseif numPlayers == 5 then
-		numSWAT = 2
-	elseif numPlayers == 6 then
-		numSWAT = 2
-	elseif numPlayers == 7 then
 		numSWAT = 3
-	elseif numPlayers >= 8 then -- возвращение великой elseif таблицы
+	elseif numPlayers == 6 then
+		numSWAT = 3
+	elseif numPlayers == 7 then
 		numSWAT = 4
+	elseif numPlayers >= 8 then -- возвращение великой elseif таблицы
+		numSWAT = 7
 	end
 
 	shuffle(players)
@@ -105,10 +105,12 @@ end
 local tblweps = {
 	[0] = { 
 		{"weapon_m4a1", {"holo15","grip3","laser4"} }, 
-		{"weapon_hk416", {"holo15","grip3","laser4"} },
+		{"weapon_hk416", {"holo15","grip3","laser4"} },	
+		{"weapon_xm1014", {"holo9"} },
 		{"weapon_p90", {} },
 		{"weapon_mp7", {"holo14"} },
-		{"weapon_m4a1", {"optic2","grip3","supressor7"} }
+		{"weapon_m4a1", {"optic2","grip3","supressor7"} },
+		{"weapon_scar"}, {"holo15","supressor2","grip3","laser4"} }
 	},
 	[1] = { 
 		"weapon_deagle",
@@ -119,7 +121,10 @@ local tblweps = {
 		"weapon_hk_usp",
 		"weapon_remington870",
 		"weapon_mac11",
-		"weapon_skorpion",
+		"weapon_m16a2",
+		"weapon_akmwreked",
+		"weapon_colt9mm",
+		"weapon_akmwreked"
 	}
 }
 

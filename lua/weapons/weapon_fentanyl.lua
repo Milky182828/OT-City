@@ -30,12 +30,10 @@ SWEP.HolsterSnd = ""
 
 function SWEP:InitializeAdd()
 	self:SetHold(self.HoldType)
-
 	self.modeValues = {
 		[1] = 1,
 	}
 end
-
 SWEP.ofsV = Vector(0,8,-3)
 SWEP.ofsA = Angle(-90,-90,90)
 SWEP.modeValuesdef = {
@@ -50,28 +48,17 @@ function SWEP:Animation()
     self:BoneSet("r_forearm", vector_origin, Angle(-hold / 6, -hold / 0.8, (-20*hold/100)))
 end
 
-function SWEP:OwnerChanged()
-	local owner = self:GetOwner()
-	if IsValid(owner) and owner:IsNPC() then
-		self:NPCHeal(owner, 0.4, "snd_jack_hmcd_needleprick.wav")
-	end
-end
-
 if SERVER then
 	function SWEP:Heal(ent, mode)
-		if ent:IsNPC() then
-			self:NPCHeal(ent, 0.4, "snd_jack_hmcd_needleprick.wav")
-		end
-
 		local org = ent.organism
 		if not org then return end
 		self:SetBodygroup(1, 1)
 		local owner = self:GetOwner()
 		local entOwner = IsValid(owner.FakeRagdoll) and owner.FakeRagdoll or owner
 
-		local injected = math.min(FrameTime() * 1, self.modeValues[1])
+		local injected = math.min(FrameTime() * 10, self.modeValues[1])
 		org.analgesiaAdd = math.min(org.analgesiaAdd + injected, 4)
-		self.modeValues[1] = math.max(self.modeValues[1] - injected, 0)
+		self.modeValues[1] = math.max(self.modeValues[1] - FrameTime() * 2, 0)
 
 		owner.injectedinto = owner.injectedinto or {}
 		owner.injectedinto[org.owner] = owner.injectedinto[org.owner] or 0

@@ -73,8 +73,6 @@ local whitelist = {
 
 local islply
 
-local hg_firstperson_death = ConVarExists("hg_firstperson_death") and GetConVar("hg_firstperson_death") or CreateClientConVar("hg_firstperson_death", "0", "first person death", true, false, 0, 1)
-
 function RenderAccessories(ply, accessories, setup)
 
 	if not IsValid(ply) or not accessories then return end
@@ -87,9 +85,6 @@ function RenderAccessories(ply, accessories, setup)
 	ent = IsValid(ply.OldRagdoll) and ply.OldRagdoll:IsRagdoll() and ply.OldRagdoll or ent
 
 	islply = ((ply:IsRagdoll() and hg.RagdollOwner(ply)) or ply) == (LocalPlayer():Alive() and LocalPlayer() or LocalPlayer():GetNWEntity("spect",LocalPlayer())) and GetViewEntity() == (LocalPlayer():Alive() and LocalPlayer() or LocalPlayer():GetNWEntity("spect",LocalPlayer()))
-	
-	local fountains = GetNetVar("fountains") or {}
-	if ent == follow and hg_firstperson_death:GetBool() and !fountains[ent] then islply = true end
 
 	if islply and IsValid(wep) and whitelist[wep:GetClass()] then
 		if not ent.modelAccess then return end
@@ -201,8 +196,6 @@ function DrawAccesories(ply, ent, accessories,accessData, islply, force, setup)
 		return
 	end
 
-	if ply.organism and hg.amputatedlimbs2[accessData["bone"]] and ent.organism and ent.organism[hg.amputatedlimbs2[accessData["bone"]].."amputated"] then return end
-
 	if setup != false then
 		local bone = ent:LookupBone(accessData["bone"])
 		if not bone then return end
@@ -289,7 +282,7 @@ function DrawAppearance(ent, ply, setup)
 		ply.flmodel:SetNoDraw(!(ply:GetNetVar("flashlight") and (!wep.IsPistolHoldType or wep:IsPistolHoldType())) or wep.reload or flashlightwep)
 	end
 
-	if ply:GetNetVar("flashlight") and not flashlightwep and (!wep.IsPistolHoldType or wep:IsPistolHoldType() or ply.PlayerClassName == "Gordon") and not wep.reload then
+	if ply:GetNetVar("flashlight") and not flashlightwep and (!wep.IsPistolHoldType or wep:IsPistolHoldType() or ply.PlayerClassName == "Gordon") and not wep.reload and hg.CanUseLeftHand(ply) then
 		local hand = ent:LookupBone("ValveBiped.Bip01_L_Hand")
 		if not hand then return end
 

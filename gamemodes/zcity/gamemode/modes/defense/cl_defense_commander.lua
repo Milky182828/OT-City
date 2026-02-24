@@ -11,7 +11,6 @@ local COMMANDER_UI = {
 
 local iconCache = {}
 
-
 local iconExtensions = {".vmt", ".png", ".jpg", ".vtf", ""}
 
 local function GetItemIcon(entityName, customIcon)
@@ -21,7 +20,6 @@ local function GetItemIcon(entityName, customIcon)
     
     local icon = nil
     
-
     if customIcon then
         for _, ext in ipairs(iconExtensions) do
             local fullPath = "materials/" .. customIcon .. ext
@@ -48,7 +46,6 @@ local function GetItemIcon(entityName, customIcon)
         end
     end
     
-  
     if not icon or icon:IsError() then
         if weapons.Get(entityName) then
             local weaponData = weapons.Get(entityName)
@@ -147,7 +144,6 @@ local function GetItemIcon(entityName, customIcon)
     return icon
 end
 
-
 surface.CreateFont("CommanderTitle", {
     font = "Roboto",
     size = 24,
@@ -177,7 +173,6 @@ surface.CreateFont("CommanderSmall", {
     antialias = true
 })
 
-
 surface.CreateFont("CommanderHintText", {
     font = "Roboto",
     size = 19,  
@@ -189,7 +184,6 @@ surface.CreateFont("CommanderHintText", {
 local commanderMenu = nil
 local currentCart = {}
 local availableItems = {}
-
 
 local function DrawBackgroundBlur()
     local x, y = 0, 0
@@ -205,11 +199,9 @@ local function DrawBackgroundBlur()
         surface.DrawTexturedRect(x * -1, y * -1, scrW, scrH)
     end
     
-
     surface.SetDrawColor(0, 0, 0, 180)
     surface.DrawRect(0, 0, scrW, scrH)
 end
-
 
 local function CalculateCartCost()
     local totalCost = 0
@@ -218,7 +210,6 @@ local function CalculateCartCost()
     end
     return totalCost
 end
-
 
 local function CreateCloseButton(parent)
     local closeBtn = vgui.Create("DButton", parent)
@@ -229,10 +220,8 @@ local function CreateCloseButton(parent)
     closeBtn.Paint = function(self, w, h)
         local color = self:IsHovered() and COMMANDER_UI.HOVER_COLOR or COMMANDER_UI.PRIMARY_COLOR
         
-        
         draw.RoundedBox(15, 0, 0, w, h, color)
         
-
         surface.SetDrawColor(COMMANDER_UI.TEXT_COLOR)
         surface.DrawLine(8, 8, w-8, h-8)
         surface.DrawLine(8, h-8, w-8, 8)
@@ -246,14 +235,12 @@ local function CreateCloseButton(parent)
     return closeBtn
 end
 
-
 function CreateCommanderMenu()
     if IsValid(commanderMenu) then commanderMenu:Remove() end
     
     local ply = LocalPlayer()
     local points = ply:GetNWInt("CommanderPoints", 0)
     
-
     commanderMenu = vgui.Create("ZFrame")
     commanderMenu:SetSize(COMMANDER_UI.PANEL_WIDTH, COMMANDER_UI.PANEL_HEIGHT)
     commanderMenu:Center()
@@ -262,29 +249,24 @@ function CreateCommanderMenu()
     commanderMenu:ShowCloseButton(false) 
     commanderMenu:MakePopup()
     
-
     CreateCloseButton(commanderMenu)
     
     commanderMenu.Paint = function(self, w, h)
         DrawBackgroundBlur(self)
         
-
         surface.SetDrawColor(COMMANDER_UI.PRIMARY_COLOR)
         surface.DrawRect(0, 0, w, 50)
 
         surface.SetDrawColor(COMMANDER_UI.BACKGROUND_COLOR)
         surface.DrawRect(0, 50, w, h - 50)
         
-
         surface.SetDrawColor(COMMANDER_UI.PRIMARY_COLOR)
         surface.DrawOutlinedRect(0, 0, w, h, 2)
         
-        draw.SimpleText("COMMANDER SUPPLY REQUISITION", "CommanderTitle", w/2, 25, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-
-        draw.SimpleText("Available Points: " .. points, "CommanderText", w - 120, 25, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+        draw.SimpleText("ЗАПРОС СНАБЖЕНИЯ КОМАНДИРА", "CommanderTitle", w/2, 25, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText("Доступные очки: " .. points, "CommanderText", w - 120, 25, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
     end
     
-
     local categoryPanel = vgui.Create("DPanel", commanderMenu)
     categoryPanel:SetSize(200, COMMANDER_UI.PANEL_HEIGHT - 60)
     categoryPanel:SetPos(10, 55)
@@ -297,13 +279,11 @@ function CreateCommanderMenu()
         surface.DrawOutlinedRect(0, 0, w, h, 1)
     end
     
-
     local itemsPanel = vgui.Create("DScrollPanel", commanderMenu)
     itemsPanel:SetSize(COMMANDER_UI.PANEL_WIDTH - 230, COMMANDER_UI.PANEL_HEIGHT - 190)
     itemsPanel:SetPos(220, 55)
     itemsPanel:DockMargin(5, 5, 5, 5)
     
-
     local scrollBar = itemsPanel:GetVBar()
     scrollBar:SetWide(12)
     scrollBar.btnUp:SetVisible(false)
@@ -325,7 +305,6 @@ function CreateCommanderMenu()
         surface.DrawOutlinedRect(0, 0, w, h, 1)
     end
     
-
     local cartPanel = vgui.Create("DPanel", commanderMenu)
     cartPanel:SetSize(COMMANDER_UI.PANEL_WIDTH - 230, 120)
     cartPanel:SetPos(220, COMMANDER_UI.PANEL_HEIGHT - 130)
@@ -337,19 +316,17 @@ function CreateCommanderMenu()
         surface.SetDrawColor(COMMANDER_UI.PRIMARY_COLOR)
         surface.DrawOutlinedRect(0, 0, w, h, 1)
         
-        draw.SimpleText("YOUR ORDER", "CommanderCategory", 10, 10, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_LEFT)
+        draw.SimpleText("ВАШ ЗАКАЗ", "CommanderCategory", 10, 10, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_LEFT)
         
         local totalCost = CalculateCartCost()
-        draw.SimpleText("Total Cost: " .. totalCost .. " points", "CommanderText", w - 10, 10, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_RIGHT)
+        draw.SimpleText("Итоговая стоимость: " .. totalCost .. " очк.", "CommanderText", w - 10, 10, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_RIGHT)
     end
     
-
     local cartList = vgui.Create("DScrollPanel", cartPanel)
     cartList:SetSize(COMMANDER_UI.PANEL_WIDTH - 250, 70)
     cartList:SetPos(10, 40)
     cartList:DockMargin(5, 5, 5, 5)
     
-
     local cartScrollBar = cartList:GetVBar()
     cartScrollBar:SetWide(12)
     cartScrollBar.btnUp:SetVisible(false)
@@ -382,7 +359,6 @@ function CreateCommanderMenu()
                 surface.SetDrawColor(COMMANDER_UI.PRIMARY_COLOR)
                 surface.DrawOutlinedRect(0, 0, w, h, 1)
                 
-
                 local iconMat = GetItemIcon(item.entity, item.icon)
                 if iconMat and type(iconMat) ~= "number" then
                     surface.SetDrawColor(255, 255, 255)
@@ -391,7 +367,7 @@ function CreateCommanderMenu()
                 end
                 
                 draw.SimpleText(item.name, "CommanderSmall", w/2 + 10, 15, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-                draw.SimpleText(item.price .. " pts x " .. (item.quantity or 1), "CommanderSmall", w/2 + 10, 35, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+                draw.SimpleText(item.price .. " очк. x " .. (item.quantity or 1), "CommanderSmall", w/2 + 10, 35, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
             end
             
             local removeButton = vgui.Create("DButton", cartItem)
@@ -409,7 +385,6 @@ function CreateCommanderMenu()
                 surface.PlaySound("ui/buttonclickrelease.wav")
             end
             
-
             local minusButton = vgui.Create("DButton", cartItem)
             minusButton:SetSize(15, 15)
             minusButton:SetPos(45, 40)
@@ -444,7 +419,6 @@ function CreateCommanderMenu()
         end
     end
     
-
     local orderButton = vgui.Create("DButton", commanderMenu)
     orderButton:SetSize(200, 40)
     orderButton:SetPos(COMMANDER_UI.PANEL_WIDTH - 220, COMMANDER_UI.PANEL_HEIGHT - 45)
@@ -463,14 +437,14 @@ function CreateCommanderMenu()
         surface.SetDrawColor(COMMANDER_UI.TEXT_COLOR)
         surface.DrawOutlinedRect(0, 0, w, h, 1)
         
-        draw.SimpleText("PLACE ORDER", "CommanderText", w/2, h/2, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText("ОФОРМИТЬ ЗАКАЗ", "CommanderText", w/2, h/2, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
     orderButton.DoClick = function()
         if #currentCart == 0 then return end
         
         local totalCost = CalculateCartCost()
         if totalCost > points then
-            chat.AddText(COMMANDER_UI.PRIMARY_COLOR, "Not enough supply points!")
+            chat.AddText(COMMANDER_UI.PRIMARY_COLOR, "Недостаточно очков снабжения!")
             surface.PlaySound("buttons/button10.wav")
             return
         end
@@ -479,7 +453,6 @@ function CreateCommanderMenu()
         net.WriteTable(currentCart)
         net.SendToServer()
         
-
         currentCart = {}
         UpdateCartDisplay()
         
@@ -487,7 +460,6 @@ function CreateCommanderMenu()
         commanderMenu:Close()
     end
     
-
     local function PopulateItems(category)
         itemsPanel:Clear()
         
@@ -508,7 +480,6 @@ function CreateCommanderMenu()
                 
                 local borderColor = self.Hovered and COMMANDER_UI.HOVER_COLOR or COMMANDER_UI.PRIMARY_COLOR
                 
-
                 if item.price > points then
                     borderColor = COMMANDER_UI.UNAVAILABLE_COLOR
                 end
@@ -516,7 +487,6 @@ function CreateCommanderMenu()
                 surface.SetDrawColor(borderColor)
                 surface.DrawOutlinedRect(0, 0, w, h, 1)
                 
-
                 local iconMat = GetItemIcon(item.entity, item.icon)
                 if iconMat and type(iconMat) ~= "number" then
                     surface.SetDrawColor(255, 255, 255)
@@ -524,25 +494,20 @@ function CreateCommanderMenu()
                     surface.DrawTexturedRect(10, 10, 60, 60)
                 end
                 
-
                 draw.SimpleText(item.name, "CommanderText", 80, 20, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_LEFT)
-                draw.SimpleText(item.price .. " points", "CommanderText", w - 150, 20, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_RIGHT)
+                draw.SimpleText(item.price .. " очк.", "CommanderText", w - 150, 20, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_RIGHT)
                 
-
                 draw.SimpleText(item.desc, "CommanderSmall", 80, 45, COMMANDER_UI.TEXT_COLOR, TEXT_ALIGN_LEFT)
             end
             
-
             local quantity = 1
             
-
             local quantityLabel = vgui.Create("DLabel", itemButton)
             quantityLabel:SetSize(30, 20)
             quantityLabel:SetPos(itemButton:GetWide() - 80, 45)
             quantityLabel:SetText("x1")
             quantityLabel:SetTextColor(COMMANDER_UI.TEXT_COLOR)
             
-
             local minusBtn = vgui.Create("DButton", itemButton)
             minusBtn:SetSize(20, 20)
             minusBtn:SetPos(itemButton:GetWide() - 110, 45)
@@ -560,7 +525,6 @@ function CreateCommanderMenu()
                 end
             end
             
-
             local plusBtn = vgui.Create("DButton", itemButton)
             plusBtn:SetSize(20, 20)
             plusBtn:SetPos(itemButton:GetWide() - 50, 45)
@@ -579,11 +543,10 @@ function CreateCommanderMenu()
                 end
             end
             
-
             local addToCartBtn = vgui.Create("DButton", itemButton)
             addToCartBtn:SetSize(100, 25)
             addToCartBtn:SetPos(itemButton:GetWide() - 110, 15)
-            addToCartBtn:SetText("Add to Cart")
+            addToCartBtn:SetText("В корзину")
             addToCartBtn:SetTextColor(COMMANDER_UI.TEXT_COLOR)
             addToCartBtn:DockMargin(5, 5, 5, 5)
             addToCartBtn.Paint = function(self, w, h)
@@ -601,12 +564,11 @@ function CreateCommanderMenu()
             
             addToCartBtn.DoClick = function()
                 if item.price * quantity > points then
-                    chat.AddText(COMMANDER_UI.PRIMARY_COLOR, "Not enough supply points for this item!")
+                    chat.AddText(COMMANDER_UI.PRIMARY_COLOR, "Недостаточно очков снабжения для этого предмета!")
                     surface.PlaySound("buttons/button10.wav")
                     return
                 end
                 
-
                 local existingItemIndex = nil
                 for idx, cartItem in ipairs(currentCart) do
                     if cartItem.entity == item.entity then
@@ -656,7 +618,6 @@ function CreateCommanderMenu()
         yPos = yPos + 50
     end
     
-
     local firstCategory
     for category, _ in pairs(availableItems) do
         firstCategory = category
@@ -670,12 +631,10 @@ function CreateCommanderMenu()
     UpdateCartDisplay()
 end
 
-
 net.Receive("defense_commander_menu", function()
     availableItems = net.ReadTable()
     CreateCommanderMenu()
 end)
-
 
 net.Receive("defense_commander_notification", function()
     local message = net.ReadString()
@@ -695,7 +654,6 @@ net.Receive("defense_commander_notification", function()
     end
 end)
 
-
 hook.Add("radialOptions", "CommanderSupplyMenu", function()
     local ply = LocalPlayer()
     
@@ -706,12 +664,11 @@ hook.Add("radialOptions", "CommanderSupplyMenu", function()
                 net.Start("defense_commander_menu")
                 net.SendToServer()
             end,
-            "Order Supplies (" .. points .. " pts)"
+            "Запросить снабжение (" .. points .. " очк.)"
         }
         hg.radialOptions[#hg.radialOptions + 1] = tbl
     end
 end)
-
 
 local COMMANDER_HINT = {
     active = false,
@@ -723,23 +680,20 @@ local COMMANDER_HINT = {
     nextTypewriterTime = 0,
     iconPos = Vector(0, 0, 0),
     targetIconPos = Vector(0, 0, 0),
-    text = [[As a Commander, you are responsible for supporting your team!  
+    text = [[Как Командир, вы отвечаете за поддержку своей команды!  
     
-Use the Q-menu to order equipment and support for your soldiers.
+Используйте Q-меню, чтобы заказывать экипировку и поддержку для бойцов.
 
-You get supply points after each wave. Use them wisely!
+После каждой волны вы получаете очки снабжения. Тратьте их с умом!
 
-Your team relies on your leadership and tactical decisions!]]
+Команда рассчитывает на ваше лидерство и тактические решения!]]
 }
-
 
 if file.Exists("materials/hint/info.png", "GAME") then
     COMMANDER_HINT.iconMaterial = Material("hint/info.png", "noclamp smooth")
 else
-
     COMMANDER_HINT.iconMaterial = Material("icon16/information.png")
 end
-
 
 function CheckAndShowCommanderHint()
     local ply = LocalPlayer()
@@ -754,7 +708,6 @@ function CheckAndShowCommanderHint()
     end
 end
 
-
 local function ShowCommanderHint()
     COMMANDER_HINT.active = true
     COMMANDER_HINT.alpha = 0
@@ -765,7 +718,6 @@ local function ShowCommanderHint()
     
     COMMANDER_HINT.iconPos = Vector(-50, ScrH() * 0.3, 0)
     
-
     COMMANDER_HINT.targetIconPos = Vector(0, 0, 0) 
     
     COMMANDER_HINT.endTime = nil
@@ -774,24 +726,20 @@ local function ShowCommanderHint()
     --print("[DEFENSE] Commander hint activated")
 end
 
-
 local function DrawCommanderHint()
     if not COMMANDER_HINT.active then return end
     
     local currentTime = CurTime()
     
-
     local panelWidth = ScrW() * 0.35  
     local panelHeight = ScrH() * 0.25  
     local panelX = ScrW() * 0.5 - panelWidth * 0.5
     local panelY = ScrH() * 0.15 
     
-
     if COMMANDER_HINT.targetIconPos.x == 0 then
         COMMANDER_HINT.targetIconPos = Vector(panelX + panelWidth - 36, panelY + 36, 0)
     end
     
-
     local fadeInTime = 0.8
     if currentTime - COMMANDER_HINT.startTime < fadeInTime then
         COMMANDER_HINT.alpha = math.Clamp((currentTime - COMMANDER_HINT.startTime) / fadeInTime, 0, 1) * 230
@@ -799,7 +747,6 @@ local function DrawCommanderHint()
         COMMANDER_HINT.alpha = 230
     end
     
-
     if COMMANDER_HINT.endTime and currentTime > COMMANDER_HINT.endTime then
         local fadeOutProgress = (currentTime - COMMANDER_HINT.endTime) / 1.5
         COMMANDER_HINT.alpha = 230 * (1 - fadeOutProgress)
@@ -810,7 +757,6 @@ local function DrawCommanderHint()
         end
     end
     
-
     surface.SetDrawColor(10, 10, 10, COMMANDER_HINT.alpha)
     surface.DrawRect(panelX, panelY, panelWidth, panelHeight)
     
@@ -821,20 +767,17 @@ local function DrawCommanderHint()
     COMMANDER_HINT.iconPos.x = Lerp(iconAnimSpeed, COMMANDER_HINT.iconPos.x, COMMANDER_HINT.targetIconPos.x)
     COMMANDER_HINT.iconPos.y = Lerp(iconAnimSpeed, COMMANDER_HINT.iconPos.y, COMMANDER_HINT.targetIconPos.y)
     
-
     local iconSize = 48  
     local iconAlpha = math.min(COMMANDER_HINT.alpha, 255)
     surface.SetDrawColor(255, 255, 255, iconAlpha)
     surface.SetMaterial(COMMANDER_HINT.iconMaterial)
     surface.DrawTexturedRect(COMMANDER_HINT.iconPos.x - iconSize/2, COMMANDER_HINT.iconPos.y - iconSize/2, iconSize, iconSize)
     
-
     if COMMANDER_HINT.typewriterIndex < string.len(COMMANDER_HINT.text) and currentTime >= COMMANDER_HINT.nextTypewriterTime then
         COMMANDER_HINT.typewriterIndex = COMMANDER_HINT.typewriterIndex + 1
         COMMANDER_HINT.typewriterText = string.sub(COMMANDER_HINT.text, 1, COMMANDER_HINT.typewriterIndex)
         COMMANDER_HINT.nextTypewriterTime = currentTime + COMMANDER_HINT.typewriterSpeed
         
-
         if math.random(1, 3) == 1 then 
             surface.PlaySound("ui/buttonclick.wav")
         end
@@ -844,14 +787,11 @@ local function DrawCommanderHint()
         COMMANDER_HINT.endTime = currentTime + 5 
     end
     
-
     draw.DrawText(COMMANDER_HINT.typewriterText, "CommanderHintText", panelX + 25, panelY + 25, 
                  Color(255, 255, 255, COMMANDER_HINT.alpha), TEXT_ALIGN_LEFT)
 end
 
-
 hook.Add("HUDPaint", "DrawCommanderHint", DrawCommanderHint)
-
 
 hook.Add("OnEntityCreated", "CheckCommanderForHint", function(ent)
     if not IsValid(ent) then return end
@@ -878,7 +818,6 @@ net.Receive("npc_defense_start", function()
     COMMANDER_HINT.shownThisRound = false
 end)
 
-
 hook.Add("OnPlayerSpawn", "CheckPlayerCommanderRole", function(ply)
     if not IsValid(ply) then return end
     if ply ~= LocalPlayer() then return end
@@ -899,7 +838,6 @@ hook.Add("InitPostEntity", "InitCommanderHint", function()
     timer.Simple(2, CheckAndShowCommanderHint)
 end)
 
-
 hook.Add("HUDPaint", "CheckForCommanderStatus", function()
     if not COMMANDER_HINT.haveCheckedInitially then
         timer.Simple(5, function()
@@ -909,19 +847,16 @@ hook.Add("HUDPaint", "CheckForCommanderStatus", function()
     end
 end)
 
-
 timer.Create("CommanderHintChecker", 1, 0, function()
     local ply = LocalPlayer()
     if not IsValid(ply) then return end
     
-
     if ply:GetNWString("PlayerRole") == "Commander" and ply:Alive() and not COMMANDER_HINT.shownThisRound then
         ShowCommanderHint()
         COMMANDER_HINT.shownThisRound = true
         print("[DEFENSE] Commander hint triggered by timer")
     end
 end)
-
 
 net.Receive("npc_defense_start", function()
     COMMANDER_HINT.shownThisRound = false
@@ -934,7 +869,6 @@ net.Receive("npc_defense_prepphase", function()
     print("[DEFENSE] Checking hint on prep phase")
 end)
 
-
 hook.Add("OnLocalPlayerRoleChanged", "CheckCommanderRoleChange", function(oldRole, newRole)
     if newRole == "Commander" and not COMMANDER_HINT.shownThisRound then
         ShowCommanderHint()
@@ -942,7 +876,6 @@ hook.Add("OnLocalPlayerRoleChanged", "CheckCommanderRoleChange", function(oldRol
         --print("[DEFENSE] Commander hint triggered by role change")
     end
 end)
-
 
 concommand.Add("defense_show_hint", function()
     ShowCommanderHint()

@@ -1,7 +1,7 @@
 --\\
 	HOKMAH_VGUI = HOKMAH_VGUI or {}
 	HOKMAH_VGUI.MainColor = Color(130, 130 ,130)
-	HOKMAH_VGUI.SecondaryColor = Color(155,0,0,240)
+	HOKMAH_VGUI.SecondaryColor = Color(35,235,78,240)
 	HOKMAH_VGUI.BackgroundColor = Color(165,165,165)
 --//
 

@@ -403,9 +403,9 @@ net.Receive("ZB_SpecMode",function(len,ply)
 
 	local enable = !hook.Run("ZB_JoinSpectators", ply)
 
-	if enable and bool and ply:Team() != TEAM_SPECTATOR then if ply:Alive() then ply:Kill() end ply:SetTeam(TEAM_SPECTATOR) PrintMessage(HUD_PRINTTALK,ply:Name().." joined the spectators.") 
+	if enable and bool and ply:Team() != TEAM_SPECTATOR then if ply:Alive() then ply:Kill() end ply:SetTeam(TEAM_SPECTATOR) PrintMessage(HUD_PRINTTALK,ply:Name().." Зашел к наблюдателям.") 
 	elseif ply:Team() != 1 then
-		ply:SetTeam(1) PrintMessage(HUD_PRINTTALK,ply:Name().." joined the players.")  
+		ply:SetTeam(1) PrintMessage(HUD_PRINTTALK,ply:Name().." Зашел к игрокам.")  
 	end
 end)
 

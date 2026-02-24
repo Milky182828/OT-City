@@ -1,5 +1,5 @@
 MODE.name = "riot"
-MODE.PrintName = "Riot"
+MODE.PrintName = "Пизделка фанатов навального"
 
 MODE.OverideSpawnPos = true
 MODE.LootSpawn = false
@@ -51,10 +51,41 @@ util.AddNetworkString("riot_roundend")
 function MODE:Intermission()
     game.CleanUpMap()
 
+
+    self.RiotPoints = {}
+    table.CopyFromTo(zb.GetMapPoints("RIOT_TDM_LAW"), self.RiotPoints)
+
+    self.LawPoints = {}
+    table.CopyFromTo(zb.GetMapPoints("RIOT_TDM_RIOTERS"), self.LawPoints)
+
+	local ctpos
+	local tpos
 	for i, ply in player.Iterator() do
 		if ply:Team() == TEAM_SPECTATOR then continue end
+		local pos
+		if ply:Team() == 1 then
+			if !ctpos then
+				ctpos = #self.LawPoints > 0 and self.LawPoints[1].pos or zb:GetRandomSpawn()
+				pos = ctpos
+			else
+				pos = hg.tpPlayer(ctpos, ply, i, 0)
+			end
+		end
+
+		if ply:Team() == 0 then
+			if !tpos then
+				tpos = #self.RiotPoints > 0 and self.RiotPoints[1].pos or zb:GetRandomSpawn()
+				pos = tpos
+			else
+				pos = hg.tpPlayer(tpos, ply, i, 0)
+			end
+		end
 
 		ply:SetupTeam(ply:Team())
+
+		if pos then
+			ply:SetPos(pos)
+		end
 	end
 
     net.Start("riot_start")
@@ -119,7 +150,7 @@ function MODE:GiveEquipment()
         ply:SetPlayerClass("terrorist")
     
     
-        zb.GiveRole(ply, "Rioter", Color(190, 0, 0))
+        zb.GiveRole(ply, "Протестующий", Color(190, 0, 0))
     
         ply:Give("weapon_hands_sh")
 
@@ -155,7 +186,7 @@ function MODE:GiveEquipment()
         ply:SetupTeam(1)
         ply:SetPlayerClass("police")
 
-        zb.GiveRole(ply, "Law Enforcement", Color(0, 0, 190))
+        zb.GiveRole(ply, "Вершитель правосудия", Color(0, 0, 190))
 
         local inv = ply:GetNetVar("Inventory")
         inv["Weapons"]["hg_sling"] = true
@@ -209,15 +240,15 @@ function MODE:CanLaunch()
             activePlayers = activePlayers + 1
         end
     end
-    
+
+
     if activePlayers < 5 then
         return false
     end
 
-    return true
-    --[[local pointsRioters = zb.GetMapPoints("RIOT_TDM_RIOTERS")
+    local pointsRioters = zb.GetMapPoints("RIOT_TDM_RIOTERS")
     local pointsLaw = zb.GetMapPoints("RIOT_TDM_LAW")
-    return (#pointsRioters > 0) and (#pointsLaw > 0)--]]
+    return (#pointsRioters > 0) and (#pointsLaw > 0)
 end
 
 return MODE

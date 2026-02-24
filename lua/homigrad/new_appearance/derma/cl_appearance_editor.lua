@@ -7,7 +7,7 @@ colors.secondary = Color(25,25,35,195)
 colors.mainText = Color(255,255,255,255)
 colors.secondaryText = Color(45,45,45,125)
 colors.selectionBG = Color(20,130,25,225)
-colors.highlightText = Color(120,35,35)
+colors.highlightText = Color(0,255,13)
 colors.presetBG = Color(35,35,45,220)
 colors.presetBorder = Color(80,80,100,255)
 colors.presetHover = Color(50,50,65,240)
@@ -287,12 +287,10 @@ local gradient_r = Material("vgui/gradient-r")
 local sw, sh = ScrW(), ScrH()
 
 function PANEL:Paint(w,h)
-
-
-    surface.SetDrawColor(28,28,28,255)
+    surface.SetDrawColor(11, 11, 11, 255)
     surface.DrawRect(0, 0, w, h)
 
-    surface.SetDrawColor(107, 107, 107,20)
+    surface.SetDrawColor(155,15,15,15)
 
     for i = 1, (ybars + 1) do
         surface.DrawRect((sw / ybars) * i - (CurTime() * 30 % (sw / ybars)), 0, ScreenScale(1), sh)
@@ -302,10 +300,23 @@ function PANEL:Paint(w,h)
         surface.DrawRect(0, (sh / xbars) * (i - 1) + (CurTime() * 30 % (sh / xbars)), sw, ScreenScale(1))
     end
 
-    local border_size = 5
+    local border_size = ScreenScale(55)
+
+    surface.SetDrawColor(0, 0, 0)
+    surface.SetMaterial(gradient_d)
+    surface.DrawTexturedRect(0, sh - border_size + 1, sw, border_size)
+
+    surface.SetDrawColor(0, 0, 0)
+    surface.SetMaterial(gradient_u)
+    surface.DrawTexturedRect(0, 0, sw, border_size)
+
     surface.SetDrawColor(0, 0, 0)
     surface.SetMaterial(gradient_l)
     surface.DrawTexturedRect(0, 0, border_size, sh)
+
+    surface.SetDrawColor(0, 0, 0)
+    surface.SetMaterial(gradient_r)
+    surface.DrawTexturedRect(sw - border_size, 0, border_size, sh)
 end
 
 function PANEL:PostInit()
@@ -324,7 +335,7 @@ function PANEL:PostInit()
     viewer:SetFOV( 75 )
     viewer:SetLookAng( Angle( 11, 180, 0 ) )
     viewer:SetCamPos( Vector( 100, 0, 55 ) )
-    viewer:SetDirectionalLight(BOX_RIGHT, Color(255, 0, 0))
+    viewer:SetDirectionalLight(BOX_RIGHT, Color(11, 255, 72))
     viewer:SetDirectionalLight(BOX_LEFT, Color(125, 155, 255))
     viewer:SetDirectionalLight(BOX_FRONT, Color(160, 160, 160))
     viewer:SetDirectionalLight(BOX_BACK, Color(0, 0, 0))
@@ -405,7 +416,7 @@ function PANEL:PostInit()
         end
 
         if IsValid(Entity) and Entity:LookupBone("ValveBiped.Bip01_Head1") then
-            funpos1x = lookX * 25
+            funpos1x = lookX * 75
             funpos3x = -lookX * 75
         end
     end
@@ -428,7 +439,7 @@ function PANEL:PostInit()
 
     local upPanel = vgui.Create("DPanel",viewer)
     upPanel:Dock(TOP)
-    upPanel:DockMargin(ScreenScale(100),0,ScreenScale(100),0)
+    upPanel:DockMargin(ScreenScale(164),0,ScreenScale(164),0)
     upPanel:SetSize(1,ScreenScale(15))
     function upPanel:Paint(w,h)
         draw.RoundedBox(0,0,0,w,h,colors.secondary)
@@ -456,7 +467,7 @@ function PANEL:PostInit()
     local bottomContainer = vgui.Create("DPanel", viewer)
     bottomContainer:Dock(BOTTOM)
     bottomContainer:SetSize(1, ScreenScale(50))
-    bottomContainer:DockMargin(ScreenScale(50), 0, ScreenScale(50), ScreenScale(8))
+    bottomContainer:DockMargin(ScreenScale(100), 0, ScreenScale(100), ScreenScale(8))
     function bottomContainer:Paint(w, h) end
 
     -- Down panel (original controls)
@@ -469,7 +480,7 @@ function PANEL:PostInit()
     local backViewButton = vgui.Create("DButton",downPanel)
     backViewButton:SetSize(ScreenScale(72),ScreenScale(15))
     backViewButton:SetFont("ZCity_Tiny")
-    backViewButton:SetText("Rotate")
+    backViewButton:SetText("Повернуть модель")
     backViewButton:Dock(LEFT)
     function backViewButton:DoClick()
         viewer.Rotate = not viewer.Rotate
@@ -484,7 +495,7 @@ function PANEL:PostInit()
     local ApplyButton = vgui.Create("DButton",downPanel)
     ApplyButton:SetSize(ScreenScale(72),ScreenScale(15))
     ApplyButton:SetFont("ZCity_Tiny")
-    ApplyButton:SetText("Apply")
+    ApplyButton:SetText("Принять")
     ApplyButton:Dock(RIGHT)
     function ApplyButton:DoClick()
         hg.Appearance.CreateAppearanceFile(hg.Appearance.SelectedAppearance:GetString(),main.AppearanceTable)
@@ -494,6 +505,7 @@ function PANEL:PostInit()
         net.SendToServer()
 
         surface.PlaySound("pwb2/weapons/iron.wav")
+        main:Close()
     end
 
     function ApplyButton:Paint(w,h)
@@ -529,7 +541,7 @@ function PANEL:PostInit()
     savePresetBtn:Dock(LEFT)
     savePresetBtn:SetSize(ScreenScale(30), ScreenScale(16))
     savePresetBtn:SetFont("ZCity_Tiny")
-    savePresetBtn:SetText("Save")
+    savePresetBtn:SetText("Сохранить")
     savePresetBtn:SetTextColor(colors.mainText)
     savePresetBtn:DockMargin(0,0,5,0)
     function savePresetBtn:Paint(w, h)
@@ -544,7 +556,7 @@ function PANEL:PostInit()
         local presetName = presetNameEntry:GetValue()
         if presetName == "" or #presetName < 2 then
             surface.PlaySound("buttons/button10.wav")
-            notification.AddLegacy("Enter a preset name (min 2 chars)", NOTIFY_ERROR, 3)
+            notification.AddLegacy("Введите имя пресета (минимум 2 символа)", NOTIFY_ERROR, 3)
             return
         end
         
@@ -552,14 +564,14 @@ function PANEL:PostInit()
         
         SavePreset(presetName, main.AppearanceTable)
         surface.PlaySound("buttons/button14.wav")
-        notification.AddLegacy("Preset '" .. presetName .. "' saved!", NOTIFY_GENERIC, 3)
+        notification.AddLegacy("Присеты '" .. presetName .. "' Сохраненно!", NOTIFY_GENERIC, 3)
     end
 
     local loadPresetBtn = vgui.Create("DButton", presetsPanel)
     loadPresetBtn:Dock(LEFT)
     loadPresetBtn:SetSize(ScreenScale(30), ScreenScale(20))
     loadPresetBtn:SetFont("ZCity_Tiny")
-    loadPresetBtn:SetText("Load")
+    loadPresetBtn:SetText("Загрузить")
     loadPresetBtn:SetTextColor(colors.mainText)
     loadPresetBtn:DockMargin(0,0,5,0)
     function loadPresetBtn:Paint(w, h)
@@ -572,12 +584,12 @@ function PANEL:PostInit()
         local presetList = GetPresetList()
         if #presetList == 0 then
             surface.PlaySound("buttons/button10.wav")
-            notification.AddLegacy("No presets saved yet!", NOTIFY_ERROR, 3)
+            notification.AddLegacy("Нет сохраненных пресетов!", NOTIFY_ERROR, 3)
             return
         end
         
         local presetMenu = vgui.Create("DFrame")
-        presetMenu:SetTitle("Load Preset")
+        presetMenu:SetTitle("Загрузить пресет")
         presetMenu:SetSize(ScreenScale(120), ScreenScale(100))
         presetMenu:Center()
         presetMenu:MakePopup()
@@ -618,10 +630,10 @@ function PANEL:PostInit()
                     modelSelector:SetText(loadedPreset.AModel or "Male 01")
                     presetNameEntry:SetText(presetName)
                     surface.PlaySound("buttons/button14.wav")
-                    notification.AddLegacy("Preset '" .. presetName .. "' loaded!", NOTIFY_GENERIC, 3)
+                    notification.AddLegacy("Пресет '" .. presetName .. "' загружен!", NOTIFY_GENERIC, 3)
                 else
                     surface.PlaySound("buttons/button10.wav")
-                    notification.AddLegacy("Failed to load preset!", NOTIFY_ERROR, 3)
+                    notification.AddLegacy("Не удалось загрузить пресет!", NOTIFY_ERROR, 3)
                 end
                 presetMenu:Close()
             end
@@ -631,7 +643,7 @@ function PANEL:PostInit()
                 confirmMenu:AddOption("Delete '" .. presetName .. "'", function()
                     DeletePreset(presetName)
                     surface.PlaySound("buttons/button15.wav")
-                    notification.AddLegacy("Preset deleted!", NOTIFY_HINT, 2)
+                    notification.AddLegacy("Пресет удален!", NOTIFY_HINT, 2)
                     presetBtn:Remove()
                 end):SetIcon("icon16/cross.png")
                 confirmMenu:Open()
@@ -643,29 +655,29 @@ function PANEL:PostInit()
     deletePresetBtn:Dock(LEFT)
     deletePresetBtn:SetSize(ScreenScale(35), ScreenScale(20))
     deletePresetBtn:SetFont("ZCity_Tiny")
-    deletePresetBtn:SetText("Delete")
+    deletePresetBtn:SetText("Удалить")
     deletePresetBtn:SetTextColor(colors.mainText)
     function deletePresetBtn:Paint(w, h)
-        local bgCol = self:IsHovered() and Color(180, 50, 50, 255) or Color(140, 40, 40, 230)
+        local bgCol = self:IsHovered() and Color(201, 21, 21) or Color(224, 55, 13, 230)
         draw.RoundedBox(4, 0, 0, w, h, bgCol)
-        surface.SetDrawColor(Color(200, 60, 60, 255))
+        surface.SetDrawColor(Color(243, 49, 15, 236))
         surface.DrawOutlinedRect(0, 0, w, h, 1)
     end
     function deletePresetBtn:DoClick()
         local presetName = presetNameEntry:GetValue()
         if presetName == "" then
             surface.PlaySound("buttons/button10.wav")
-            notification.AddLegacy("Enter preset name to delete", NOTIFY_ERROR, 3)
+            notification.AddLegacy("Введите имя пресета для удаления", NOTIFY_ERROR, 3)
             return
         end
         
         if DeletePreset(presetName) then
             surface.PlaySound("buttons/button15.wav")
-            notification.AddLegacy("Preset '" .. presetName .. "' deleted!", NOTIFY_HINT, 3)
+            notification.AddLegacy("Пресет '" .. presetName .. "' удален!", NOTIFY_HINT, 3)
             presetNameEntry:SetText("")
         else
             surface.PlaySound("buttons/button10.wav")
-            notification.AddLegacy("Preset not found!", NOTIFY_ERROR, 3)
+            notification.AddLegacy("Пресет не найден!", NOTIFY_ERROR, 3)
         end
     end
 
@@ -673,7 +685,7 @@ function PANEL:PostInit()
     presetNameEntry:Dock(FILL)
     presetNameEntry:SetSize(ScreenScale(80), ScreenScale(20))
     presetNameEntry:SetFont("ZCity_Tiny")
-    presetNameEntry:SetPlaceholderText("Preset name...")
+    presetNameEntry:SetPlaceholderText("Имя присета")
     presetNameEntry:SetContentAlignment(5)
     presetNameEntry:DockMargin(5,0,0,0)
     function presetNameEntry:Paint(w, h)
@@ -697,10 +709,10 @@ function PANEL:PostInit()
     local hatSelector = vgui.Create("DButton",viewer)
     hatSelector:SetSize(ScreenScale(100),ScreenScale(16))
     hatSelector:SetFont("ZCity_Tiny")
-    hatSelector:SetText("Hats")
+    hatSelector:SetText("Голова")
     function hatSelector:Think()
         if funpos1x then
-            hatSelector:SetPos(sizeX * 0.1 + funpos1x, sizeY * 0.2)
+            hatSelector:SetPos(sizeX * 0.2 + funpos1x, sizeY * 0.2)
         end
     end
 
@@ -716,7 +728,7 @@ function PANEL:PostInit()
         
         originalAccessory[1] = main.AppearanceTable.AAttachments[1]
         
-        hatSelectMenu = CreateStyledAccessoryMenu(nil, "Select Hat")
+        hatSelectMenu = CreateStyledAccessoryMenu(nil, "Выбери шляпу")
         table.insert(accessoryMenus, hatSelectMenu)
         
         for k, v in pairs(hg.Accessories) do
@@ -741,7 +753,7 @@ function PANEL:PostInit()
         end
         
         hatSelectMenu:AddNoneOption(function()
-            main.AppearanceTable.AAttachments[1] = "none"
+            main.AppearanceTable.AAttachments[1] = "Убрать"
             previewAccessory[1] = nil
         end)
         
@@ -761,10 +773,10 @@ function PANEL:PostInit()
     local faceSelector = vgui.Create("DButton",viewer)
     faceSelector:SetSize(ScreenScale(100),ScreenScale(16))
     faceSelector:SetFont("ZCity_Tiny")
-    faceSelector:SetText("Face")
+    faceSelector:SetText("Лицо")
     function faceSelector:Think()
         if funpos1x then
-            faceSelector:SetPos(sizeX * 0.1 + funpos1x, sizeY * 0.2 + ScreenScale(32))
+            faceSelector:SetPos(sizeX * 0.2 + funpos1x, sizeY * 0.2 + ScreenScale(32))
         end
     end
     function faceSelector:Paint(w,h)
@@ -779,7 +791,7 @@ function PANEL:PostInit()
         
         originalAccessory[2] = main.AppearanceTable.AAttachments[2]
         
-        faceSelectorMenu = CreateStyledAccessoryMenu(nil, "Select Face Accessory")
+        faceSelectorMenu = CreateStyledAccessoryMenu(nil, "Выбрать аксессуар для лица")
         table.insert(accessoryMenus, faceSelectorMenu)
         
         for k, v in pairs(hg.Accessories) do
@@ -804,7 +816,7 @@ function PANEL:PostInit()
         end
         
         faceSelectorMenu:AddNoneOption(function()
-            main.AppearanceTable.AAttachments[2] = "none"
+            main.AppearanceTable.AAttachments[2] = "Убрать"
             previewAccessory[2] = nil
         end)
         
@@ -824,10 +836,10 @@ function PANEL:PostInit()
     local bodySelector = vgui.Create("DButton",viewer)
     bodySelector:SetSize(ScreenScale(100),ScreenScale(16))
     bodySelector:SetFont("ZCity_Tiny")
-    bodySelector:SetText("Body")
+    bodySelector:SetText("Тело")
     function bodySelector:Think()
         if funpos3x then
-            bodySelector:SetPos(sizeX * 0.1 + funpos1x, sizeY * 0.2 + ScreenScale(64))
+            bodySelector:SetPos(sizeX * 0.2 - funpos3x, sizeY * 0.2 + ScreenScale(64))
         end
     end
     function bodySelector:Paint(w,h)
@@ -835,7 +847,7 @@ function PANEL:PostInit()
         surface.SetDrawColor(colors.scrollbarBorder)
         surface.DrawOutlinedRect(0,0,w,h,1)
     end
-    bodySelector:SetPos(sizeX * 0.1, sizeY * 0.5)
+    bodySelector:SetPos(sizeX * 0.7, sizeY * 0.5)
     
     function bodySelector:DoClick()
         main.modelPosID = "Torso"
@@ -843,7 +855,7 @@ function PANEL:PostInit()
         
         originalAccessory[3] = main.AppearanceTable.AAttachments[3]
         
-        bodySelectorMenu = CreateStyledAccessoryMenu(nil, "Select Body Accessory")
+        bodySelectorMenu = CreateStyledAccessoryMenu(nil, "Выбрать аксессуар для тела")
         table.insert(accessoryMenus, bodySelectorMenu)
         
         for k, v in pairs(hg.Accessories) do
@@ -868,7 +880,7 @@ function PANEL:PostInit()
         end
         
         bodySelectorMenu:AddNoneOption(function()
-            main.AppearanceTable.AAttachments[3] = "none"
+            main.AppearanceTable.AAttachments[3] = "Убрать"
             previewAccessory[3] = nil
         end)
         
@@ -889,10 +901,10 @@ function PANEL:PostInit()
     local bodyMatSelector = vgui.Create("DButton",viewer)
     bodyMatSelector:SetSize(ScreenScale(100),ScreenScale(16))
     bodyMatSelector:SetFont("ZCity_Tiny")
-    bodyMatSelector:SetText("Jacket")
+    bodyMatSelector:SetText("Куртка")
     function bodyMatSelector:Think()
         if funpos3x then
-            bodyMatSelector:SetPos(sizeX * 0.5 - funpos3x, sizeY * 0.2)
+            bodyMatSelector:SetPos(sizeX * 0.65 - funpos3x, sizeY * 0.2)
         end
     end
     function bodyMatSelector:Paint(w,h)
@@ -900,7 +912,7 @@ function PANEL:PostInit()
         surface.SetDrawColor(colors.scrollbarBorder)
         surface.DrawOutlinedRect(0,0,w,h,1)
     end
-    bodyMatSelector:SetPos(sizeX * 0.5, sizeY * 0.5)
+    bodyMatSelector:SetPos(sizeX * 0.7, sizeY * 0.5)
     function bodyMatSelector:DoClick()
         main.modelPosID = "Torso"
         bodyMatSelectorMenu = DermaMenu()
@@ -933,10 +945,10 @@ function PANEL:PostInit()
     local legsMatSelector = vgui.Create("DButton",viewer)
     legsMatSelector:SetSize(ScreenScale(100),ScreenScale(16))
     legsMatSelector:SetFont("ZCity_Tiny")
-    legsMatSelector:SetText("Pants")
+    legsMatSelector:SetText("Штаны")
     function legsMatSelector:Think()
         if funpos3x then
-            legsMatSelector:SetPos(sizeX * 0.5 - funpos3x, sizeY * 0.2 + ScreenScale(32))
+            legsMatSelector:SetPos(sizeX * 0.65 - funpos3x, sizeY * 0.2 + ScreenScale(32))
         end
     end
     function legsMatSelector:Paint(w,h)
@@ -944,7 +956,7 @@ function PANEL:PostInit()
         surface.SetDrawColor(colors.scrollbarBorder)
         surface.DrawOutlinedRect(0,0,w,h,1)
     end
-    legsMatSelector:SetPos(sizeX * 0.5, sizeY * 0.5)
+    legsMatSelector:SetPos(sizeX * 0.7, sizeY * 0.5)
     function legsMatSelector:DoClick()
         main.modelPosID = "Legs"
         legsMatSelectorMenu = DermaMenu()
@@ -971,10 +983,10 @@ function PANEL:PostInit()
     local bootsMatSelector = vgui.Create("DButton",viewer)
     bootsMatSelector:SetSize(ScreenScale(100),ScreenScale(16))
     bootsMatSelector:SetFont("ZCity_Tiny")
-    bootsMatSelector:SetText("Boots")
+    bootsMatSelector:SetText("Ботинки")
     function bootsMatSelector:Think()
         if funpos3x then
-            bootsMatSelector:SetPos(sizeX * 0.5 - funpos3x, sizeY * 0.2 + ScreenScale(64))
+            bootsMatSelector:SetPos(sizeX * 0.65 - funpos3x, sizeY * 0.2 + ScreenScale(64))
         end
     end
     function bootsMatSelector:Paint(w,h)
@@ -982,7 +994,7 @@ function PANEL:PostInit()
         surface.SetDrawColor(colors.scrollbarBorder)
         surface.DrawOutlinedRect(0,0,w,h,1)
     end
-    bootsMatSelector:SetPos(sizeX * 0.5, sizeY * 0.5)
+    bootsMatSelector:SetPos(sizeX * 0.7, sizeY * 0.5)
     function bootsMatSelector:DoClick()
         main.modelPosID = "Boots"
         bootsMatSelectorMenu = DermaMenu()
@@ -1009,10 +1021,10 @@ function PANEL:PostInit()
     local glovesSelector = vgui.Create("DButton",viewer)
     glovesSelector:SetSize(ScreenScale(100),ScreenScale(16))
     glovesSelector:SetFont("ZCity_Tiny")
-    glovesSelector:SetText("Gloves")
+    glovesSelector:SetText("Перчатки")
     function glovesSelector:Think()
         if funpos3x then
-            glovesSelector:SetPos(sizeX * 0.5 - funpos3x, sizeY * 0.2 + ScreenScale(96))
+            glovesSelector:SetPos(sizeX * 0.65 - funpos3x, sizeY * 0.2 + ScreenScale(96))
         end
     end
     function glovesSelector:Paint(w,h)
@@ -1020,7 +1032,7 @@ function PANEL:PostInit()
         surface.SetDrawColor(colors.scrollbarBorder)
         surface.DrawOutlinedRect(0,0,w,h,1)
     end
-    glovesSelector:SetPos(sizeX * 0.5, sizeY * 0.5)
+    glovesSelector:SetPos(sizeX * 0.7, sizeY * 0.5)
     function glovesSelector:DoClick()
         main.modelPosID = "Hands"
         glovesSelectorMenu = DermaMenu()
@@ -1041,10 +1053,10 @@ function PANEL:PostInit()
     local faceMatSelector = vgui.Create("DButton",viewer)
     faceMatSelector:SetSize(ScreenScale(100),ScreenScale(16))
     faceMatSelector:SetFont("ZCity_Tiny")
-    faceMatSelector:SetText("Facemap")
+    faceMatSelector:SetText("Лицо персонажа")
     function faceMatSelector:Think()
         if funpos3x then
-            faceMatSelector:SetPos(sizeX * 0.5 - funpos3x, sizeY * 0.2 + ScreenScale(96 + 32))
+            faceMatSelector:SetPos(sizeX * 0.65 - funpos3x, sizeY * 0.2 + ScreenScale(96 + 32))
         end
     end
     function faceMatSelector:Paint(w,h)
@@ -1052,11 +1064,11 @@ function PANEL:PostInit()
         surface.SetDrawColor(colors.scrollbarBorder)
         surface.DrawOutlinedRect(0,0,w,h,1)
     end
-    faceMatSelector:SetPos(sizeX * 0.5, sizeY * 0.5)
+    faceMatSelector:SetPos(sizeX * 0.7, sizeY * 0.5)
     function faceMatSelector:DoClick()
         main.modelPosID = "Face"
         faceMatSelectorMenu = DermaMenu()
-        for k, v in SortedPairs(hg.Appearance.FacemapsSlots[hg.Appearance.FacemapsModels[tMdl.mdl]]) do
+        for k, v in pairs(hg.Appearance.FacemapsSlots[hg.Appearance.FacemapsModels[tMdl.mdl]]) do
             local mater = faceMatSelectorMenu:AddOption(k,function()
 				surface.PlaySound("player/weapon_draw_0"..math.random(2, 5)..".wav")
                 main.AppearanceTable.AFacemap = k
@@ -1080,21 +1092,17 @@ end
 vgui.Register( "HG_AppearanceMenu", PANEL, "ZFrame")
 
 concommand.Add("hg_appearance_menu",function()
-    print('use esc menu')
-end)
-
-function hg.CreateApperanceMenu(ParentPanel)
     if hg.Appearance.PrecacheModels then
         hg.Appearance.PrecacheModels()
     end
-
+    
     hg.PointShop:SendNET( "SendPointShopVars", nil, function( data )
         if IsValid(zpan) then
             zpan:Close()
         end
-        zpan = vgui.Create("HG_AppearanceMenu",ParentPanel)
-        zpan:SetSize(ParentPanel:GetWide(),ParentPanel:GetTall())
-        zpan:SetPos(0,0)
+        zpan = vgui.Create("HG_AppearanceMenu")
+        zpan:SetSize(sizeX,sizeY)
+        zpan:SetPos()
+        zpan:MakePopup()
     end)
-    
-end
+end)

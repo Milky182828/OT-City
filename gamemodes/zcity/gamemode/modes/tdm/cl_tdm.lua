@@ -50,7 +50,7 @@ function MODE:HUDPaint()
 	self:AddHudPaint()
 	if StartTime + 20 > CurTime() then
 		draw.SimpleText( string.FormattedTime(StartTime + 20 - CurTime(), "%02i:%02i:%02i"	), "ZB_HomicideMedium", sw * 0.5, sh * 0.95, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-		draw.SimpleText( "Press F3 to open buymenu", "ZB_HomicideMedium", sw * 0.5, sh * 0.9, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText( "Нажми f3 что бы закупиться", "ZB_HomicideMedium", sw * 0.5, sh * 0.9, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 	else
 		local time = string.FormattedTime( math.max(StartTime + (zb.ROUND_TIME or 400) - CurTime(), 0), "%02i:%02i:%02i" )
 		draw.SimpleText( time, "ZB_HomicideMedium", sw * 0.5, sh * 0.95, ColorObj, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
@@ -336,7 +336,7 @@ local function OpenBuyMenu()
 	if not LocalPlayer():Alive() or StartTime + 40 < CurTime() then return end
 	TDM_OpenedBuyMenu = vgui.Create("ZFrame")
 	local Frame = TDM_OpenedBuyMenu
-	Frame:SetSize(ScrW()*0.35,ScrH()*0.85)
+	Frame:SetSize(1920*0.35,ScrH()*0.85)
 	Frame:Center()
 	Frame:MakePopup()
 	Frame:SetTitle("Buy menu")

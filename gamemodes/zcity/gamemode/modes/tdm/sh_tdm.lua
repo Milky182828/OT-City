@@ -64,6 +64,8 @@ AddItemToBUY( "Ruger 10/22", "Weapon", "weapon_ruger", 1000, "Carbines", {} )
 AddItemToBUY( "Mini-14", "Weapon", "weapon_mini14", 2200, "Carbines", {} )
 
 AddItemToBUY( "AKM", "Weapon", "weapon_akm", 3200, "Assault", {"holo6","holo1","holo2","supressor1","optic7"}, nil, 0 )--0 = terrorist, 1 = swat
+AddItemToBUY( "Underground AKM", "Weapon", "weapon_akmwreked", 1000, "Assault", {} )
+AddItemToBUY( "M16", "Weapon", "weapon_m16a2", 2000, "Assault", {} )
 AddItemToBUY( "M4A1", "Weapon", "weapon_m4a1", 2700, "Assault", {"holo1","holo2","supressor2","holo15","optic8"}, nil, 1 )
 AddItemToBUY( "HK416", "Weapon", "weapon_hk416", 3000, "Assault", {"holo1","holo2","supressor2","holo15","optic8"}, nil, 1 )
 AddItemToBUY( "AK-74", "Weapon", "weapon_ak74", 2400, "Assault", {"holo6","holo1","holo2","supressor1","supressor8","optic7"}, nil, 0 )
@@ -95,6 +97,7 @@ AddItemToBUY( "Karabiner 98k", "Weapon", "weapon_kar98", 2100, "Marksman/Sniper"
 AddItemToBUY( "SKS", "Weapon", "weapon_sks", 2900, "Marksman/Sniper", {"optic4"}, nil, 0 )
 AddItemToBUY( "SVD", "Weapon", "weapon_svd", 5200, "Marksman/Sniper", {"optic4"}, nil, 0 )
 AddItemToBUY( "Barrett M98B", "Weapon", "weapon_m98b", 4200, "Marksman/Sniper", {} )
+AddItemToBUY( "Orsis", "Weapon", "weapon_orsis", 3500, "Marksman/Sniper", {} )
 
 -- Armor
 AddItemToBUY( "IIIA Vest", "Armor", "ent_armor_vest3", 450, "Equipment", {} )

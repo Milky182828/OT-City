@@ -11,8 +11,8 @@ local models = {
 }
 
 local subnames = {
-	"Big ",
-	"Lil ",
+	"Большой ",
+	"Лил ",
 	"OG "
 }
 

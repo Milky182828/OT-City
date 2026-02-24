@@ -330,13 +330,13 @@ if CLIENT then
 				local speed = input.LookupBinding("+speed") or "BIND YOUR +SPEED KEY PLEASE. WRITE \"bind shift +speed\" IN CONSOLE FOR THE LOVE OF GOD"
 				
 				ent.HowToUseInstructions = 
-				"<font=ZCity_Tiny>"..string.upper( use ).." open normally</font>\n"..
-				"<font=ZCity_Tiny>"..string.upper( walk ).." + ".. string.upper( use ) .." open slower</font>\n"..
-				"<font=ZCity_Tiny>"..string.upper( speed ).." + ".. string.upper( use ) .." open faster</font>\n"
+				"<font=ZCity_Tiny>"..string.upper( use ).." Открыть нормально</font>\n"..
+				"<font=ZCity_Tiny>"..string.upper( walk ).." + ".. string.upper( use ) .." Медленно открыть</font>\n"..
+				"<font=ZCity_Tiny>"..string.upper( speed ).." + ".. string.upper( use ) .." Открыть быстрее</font>\n"
 
-				ent.HudHintMarkup = markup.Parse("<font=ZCity_Tiny>".. "Door" .."</font>\n<font=ZCity_SuperTiny><colour=125,125,125>".. ent.HowToUseInstructions .."</colour></font>", 450)
+				ent.HudHintMarkup = markup.Parse("<font=ZCity_Tiny>".. "Дверь" .."</font>\n<font=ZCity_SuperTiny><colour=125,125,125>".. ent.HowToUseInstructions .."</colour></font>", 450)
 				ent.AdditionalInfoFunc = function()
-					return lply:KeyDown(IN_WALK) and "Open door for "..math.Round(100 - math.min(math.abs(lply:EyeAngles().p) / 60, 1) * 100).."%" or ""--lply:GetNWInt("door_open_amt", 0)
+					return lply:KeyDown(IN_WALK) and "Открыть дверь для"..math.Round(100 - math.min(math.abs(lply:EyeAngles().p) / 60, 1) * 100).."%" or ""--lply:GetNWInt("door_open_amt", 0)
 				end
 			end
 		end

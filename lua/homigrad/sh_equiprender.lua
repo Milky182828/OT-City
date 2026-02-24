@@ -145,15 +145,15 @@ if CLIENT then
 				local model = ply.modelArmor[armor]
 				model:SetNoDraw(true)
 				model:SetModelScale( (fem and armorData.femscale) or armorData.scale or 1 )
-				local fallback_mat = istable(armorData.material) and armorData.material[1] or armorData.material
-				if model.materialset != ply:GetNWString("ArmorMaterials" .. armor, fallback_mat) then
-					model.materialset = ply:GetNWString("ArmorMaterials" .. armor, fallback_mat)
-					model:SetSubMaterial(0, ply:GetNWString("ArmorMaterials" .. armor, fallback_mat))
+				--if armorData.material and not model.materialset then model.materialset = true model:SetSubMaterial(0, armorData.material) end
+				if ent:GetNWString("ArmorMaterials" .. armor) and not model.materialset then 
+					model.materialset = true
+					model:SetSubMaterial(0, ply:GetNWString("ArmorMaterials" .. armor))
 				end
 
-				if ent:GetNWInt("ArmorSkins" .. armor, 0) and not model.skinset then
+				if ent:GetNWInt("ArmorSkins" .. armor) and not model.skinset then 
 					model.skinset = true
-					model:SetSkin(ply:GetNWInt("ArmorSkins" .. armor, 0))
+					model:SetSkin(ply:GetNWInt("ArmorSkins" .. armor))
 				end
 				if not armorData.nobonemerge then
 					model:AddEffects(EF_BONEMERGE)
@@ -237,7 +237,7 @@ if CLIENT then
 
 	local function BlurScreen(density,alpha)
 		local layers, density, alpha = 1, density or .4, alpha or 255
-		surface.SetDrawColor(255, 255, 255, alpha)
+		surface.SetDrawColor(0, 255, 0, alpha)
 		surface.SetMaterial(blurMat2)
 		local FrameRate, Num, Dark = 1 / FrameTime(), 3, 150
 
@@ -323,7 +323,7 @@ if CLIENT then
 					surface.DrawTexturedRect(0, 0, ScrW(), ScrH())
 					surface.SetDrawColor(255,255,255,255)
 					surface.SetMaterial(brainhemorrhage)
-					surface.DrawTexturedRect(0, 0, ScrW(), ScrH())
+					surface.DrawTexturedRect(0, 0, ScrW(), ScrH())     ---РОМА ДЕРЖИТ МЕНЯ В ЗАЛОЖНИКАХ,ПОМОГИТЕ
 				end
 			end
 
@@ -414,11 +414,10 @@ if CLIENT then
 	
 		if not organism.otrub and table.Count(tbl) > 0 then
 			hg.radialOptions = hg.radialOptions or {}
-			local newEntry = {equipmentMenu, "Equipment"}
+			local newEntry = {equipmentMenu, "Снаряжение"}
 			hg.radialOptions[#hg.radialOptions + 1] = newEntry
 		end
 	end)
-	
 	
 	concommand.Add("hg_add_equipment", function(ply, cmd, args)
 		local att = args[1]
@@ -445,7 +444,7 @@ if CLIENT then
 	local gray = Color(200, 200, 200)
 	local blue = Color(200, 200, 255)
 	local red = Color(75,25,25)
-	local redselected = Color(150,0,0)
+	local redselected = Color(178,196,11)
 	local whitey = Color(255, 255, 255)
 	local menuPanel
 	local chosen2
@@ -524,7 +523,7 @@ if CLIENT then
 		lbl:DockMargin(10,0,0,10)
 
 		lbl.Paint = function(self, w, h)
-			draw.SimpleText("LMB - Drop equipment", "ZCity_Tiny", w * 0.5, h * 0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText("ЛКМ-Выбросить снарягу", "ZCity_Tiny", w * 0.5, h * 0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 
 		local scroll = vgui.Create("DScrollPanel",frame)
@@ -558,20 +557,14 @@ if CLIENT then
 				if !hg.armorNames[v] and isnumber(k) then continue end
 				//if hg.armor[v][k].nodrop then continue end
 				local but = vgui.Create("DButton")
-				local prefix = string.find(k, "_")
-				if prefix then
-					k = string.sub(k, prefix + 1)
-				end
-
-				but:SetText( hg.armorNames[v] or string.NiceName(k) )
-				but:SetFont("ZCity_Tiny")
+				but:SetText( hg.armorNames[v] or k )
 				but:Dock( TOP )
 				but:DockMargin( 0, 0, 0, 5 )
 				but:SetSize(0, ScreenScaleH(20))
 
 				but.Paint = function(self, w, h)
 					surface.SetMaterial(mat)
-					surface.SetDrawColor(100, 0, 0, 255)
+					surface.SetDrawColor(219, 172, 16)
 					surface.DrawTexturedRect(0, 0, w, h)
 				end
 	

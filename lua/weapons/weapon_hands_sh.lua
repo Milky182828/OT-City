@@ -5,7 +5,8 @@ local function RagdollOwner(ent)
 end
 
 SWEP.Category = "ZCity Other"
-SWEP.Instructions = "LMB - raise fists\nRELOAD - lower fists\n\nIn the raised state:\nLMB - strike\nRMB - block\n\nIn the lowered state: RMB - raise the object, RMB+R - check the pulse (when used on someone's head or hand)\n\nWhen holding the object: RELOAD - fix the object in air, E - spin the object in the air."
+SWEP.Instructions = "LMB - поднять кулаки; RELOAD - опустить кулаки; В поднятом состоянии: LMB - удар; RMB - блок; В опущенном состоянии: RMB - поднять объект, RMB+R - проверить пульс (когда используется на голове или руке человека); Когда держите объект: RELOAD - зафиксировать объект в воздухе, E - вращать объект в воздухе."
+
 SWEP.Spawnable = true
 SWEP.AdminOnly = false
 SWEP.HoldType = "normal"
@@ -539,7 +540,7 @@ if SERVER then
 	SWEP.AutoSwitchTo = false
 	SWEP.AutoSwitchFrom = false
 else
-	SWEP.PrintName = "Hands"
+	SWEP.PrintName = "Руки"
 	SWEP.Slot = 0
 	SWEP.SlotPos = 1
 	SWEP.DrawAmmo = false
@@ -742,7 +743,6 @@ function SWEP:CanPickup(ent)
 end
 
 local trMins, trMaxs = Vector(-5, -5, -5), Vector(5, 5, 5)
-local trMinsClaws, trMaxsClaws = Vector(-8, -8, -8), Vector(8, 8, 8)
 function SWEP:SecondaryAttack()
 	local owner = self:GetOwner()
 	if owner:InVehicle() then return end
@@ -768,27 +768,9 @@ function SWEP:SecondaryAttack()
 				start = pos,
 				endpos = pos + owner:GetAimVector() * self.ReachDistance,
 				filter = {ply, hg.GetCurrentCharacter(ply)},
-				mins = trMinsClaws,
-				maxs = trMaxsClaws,
-			})
-		else
-			tr = util.TraceLine({
-				start = pos,
-				endpos = pos + owner:GetAimVector() * self.ReachDistance,
-				filter = {ply, hg.GetCurrentCharacter(ply)},
 				mins = trMins,
 				maxs = trMaxs,
 			})
-
-			if !tr.Hit or tr.Entity:IsWorld() then
-				tr = util.TraceHull({
-					start = pos,
-					endpos = pos + owner:GetAimVector() * self.ReachDistance,
-					filter = {ply, hg.GetCurrentCharacter(ply)},
-					mins = trMins,
-					maxs = trMaxs,
-				})
-			end
 		end
 
 		--if (IsValid(tr.Entity) or game.GetWorld() == tr.Entity) and self:CanPickup(tr.Entity) and not tr.Entity:IsPlayer() then
@@ -937,9 +919,9 @@ function SWEP:ApplyForce()
 						end
 
 						if (org.last_heartbeat + 60) > CurTime() then
-							ply:ChatPrint("The body is still warm.")
+							ply:ChatPrint("Тело ещё тёплое.")
 						else
-							ply:ChatPrint((org.last_heartbeat + 180) < CurTime() and "The body has been here for awhile." or "The body is slightly warm")
+							ply:ChatPrint((org.last_heartbeat + 180) < CurTime() and "Тело лежит здесь уже какое-то время." or "Тело слегка тёплое")
 						end
 
 						if org.blood < 3500 then
@@ -951,7 +933,7 @@ function SWEP:ApplyForce()
 						end
 
 						if org.bleed > 0 then
-							ply:ChatPrint("The body is bleeding "..((org.bleed > 10 and "profusely.") or (org.bleed > 5 and "moderately.") or "slightly."))
+							ply:ChatPrint("Тело кровоточит "..((org.bleed > 10 and "Сильно.") or (org.bleed > 5 and "Умеренно.") or "Слабо."))
 						end
 
 						//org.bulletwounds = 0
@@ -962,27 +944,27 @@ function SWEP:ApplyForce()
 						//org.explosionwounds = 0
 
 						if org.bulletwounds > 0 then
-							ply:ChatPrint("You notice "..org.bulletwounds.." bullet wounds on this body.")
+							ply:ChatPrint("Вы замечаете "..org.bulletwounds.." пулевых ранений на теле.")
 						end
 
 						if org.stabwounds > 0 then
-							ply:ChatPrint("You notice "..org.stabwounds.." stab wounds on this body.")//28 STAB WOUNDS. YOU WOULDNT LEAVE HIM A CHANCE, HUH?
+							ply:ChatPrint("Вы замечаете "..org.stabwounds.." колотых ран на теле.")//28 STAB WOUNDS. YOU WOULDNT LEAVE HIM A CHANCE, HUH?
 						end
 
 						if org.slashwounds > 0 then
-							ply:ChatPrint("You notice "..org.slashwounds.." slashes on this body.")
+							ply:ChatPrint("Вы замечаете "..org.slashwounds.." резаных ран на теле.")
 						end
 
 						if org.bruises > 0 then
-							ply:ChatPrint("You notice "..org.bruises.." bruises on this body.")
+							ply:ChatPrint("Вы замечаете "..org.bruises.." синяков на теле.")
 						end
 
 						if org.burns > 0 then
-							ply:ChatPrint("The body was burned.")
+							ply:ChatPrint("Тело обожжено.")
 						end
 
 						if org.explosionwounds > 0 then
-							ply:ChatPrint("The body appears to have blast trauma.")
+							ply:ChatPrint("Похоже, тело получило травмы от взрыва.")
 						end
 
 						if (bone == "ValveBiped.Bip01_Head1") then
@@ -995,14 +977,14 @@ function SWEP:ApplyForce()
 							--ply:ChatPrint(org.otrub and "No reaction." or "Reaction present.")
 
 							if org.isPly and not org.otrub then
-								org.owner:ChatPrint("You were checked for reaction.")
+								org.owner:ChatPrint("Вас проверили на реакцию.")
 							end
 						end
 					end
 
 					self.Checking = math.min(self.Checking + FrameTime() * 2, 10)
 				else
-					ply:Notify("I dont think I need to check their vitals.", 10)
+					ply:Notify("Не думаю, что мне нужно проверять их жизненные показатели.", 10)
 				end
 			end
 		end
@@ -1019,8 +1001,8 @@ function SWEP:ApplyForce()
 				tr.mask = MASK_SOLID
 				tr.filter = {self.CarryEnt, self, ply}
 				local trace = util.TraceLine(tr)
-				
-				if bone != "ValveBiped.Bip01_Spine2" or !trace.Hit then
+
+					if bone != "ValveBiped.Bip01_Spine2" or !trace.Hit then
 					phys:ApplyForceCenter(ply:GetAimVector() * math.min(5000, phys:GetMass() * 800))
 					self:SetCarrying()
 				end
@@ -1028,9 +1010,9 @@ function SWEP:ApplyForce()
 				if org and bone == "ValveBiped.Bip01_Spine2" and trace.Hit then
 					if self.firstTimePrint then
 						if not ply2.noHead then
-							ply:ChatPrint("You are beginning to perform CPR.")
+							ply:ChatPrint("Вы начинаете проводить сердечно-лёгочную реанимацию (СЛР).")
 						else
-							ply:Notify("I dont think CPR would help here...", 10)
+							ply:Notify("Не думаю, что здесь СЛР поможет...", 10)
 						end
 					end
 
@@ -1265,7 +1247,7 @@ function SWEP:Think()
 		end
 		self.InfoMarkup = nil
 	elseif self.handsDesc != "default" then
-		self.PrintName = "Hands"
+		self.PrintName = "Руки"
 		self.handsDesc = "default"
 		self.InfoMarkup = nil
 	end
@@ -1499,18 +1481,7 @@ function SWEP:AttackFront(special_attack, rand)
 	--self.PenetrationCopy = -(-self.Penetration) -- это как
 	owner:LagCompensation(true)
 	local Ent, HitPos, _, physbone, trace = WhomILookinAt(owner, .3, special_attack and 35 or 45)
-	if clawClasses[owner.PlayerClassName] then
-		local pos = hg.eye(owner)
-		trace = util.TraceHull({
-			start = pos,
-			endpos = pos + owner:GetAimVector() * self.ReachDistance,
-			filter = {owner, hg.GetCurrentCharacter(owner)},
-			mins = trMinsClaws,
-			maxs = trMaxsClaws,
-		})
-		Ent = trace.Entity
-		HitPos = trace.HitPos
-	else
+	if true --[[clawClasses[owner.PlayerClassName]] then
 		local pos = hg.eye(owner)
 		trace = util.TraceHull({
 			start = pos,
@@ -1992,33 +1963,3 @@ function SWEP:Holster( wep )
 
 	return true
 end
-
--- hook.Add("IKPoleRightArm", "HandsPoles", function(ply, ent)
--- 	local wep = ply.GetActiveWeapon and ply:GetActiveWeapon() or false
--- 	if wep and IsValid(wep) then
--- 		local mdl = wep.GetWM and IsValid(wep:GetWM()) and wep:GetWM() or false
--- 		if mdl then
--- 			local rh = mdl:LookupBone("ValveBiped.Bip01_R_Forearm")
--- 			if not rh then return end
--- 			local rhmat = mdl:GetBoneMatrix(rh)
--- 			if rhmat then
--- 				return rhmat:GetTranslation()
--- 			end
--- 		end
--- 	end
--- end)
-
--- hook.Add("IKPoleLeftArm", "HandsPoles", function(ply, ent)
--- 	local wep = ply.GetActiveWeapon and ply:GetActiveWeapon() or false
--- 	if wep and IsValid(wep) then
--- 		local mdl = wep.GetWM and IsValid(wep:GetWM()) and wep:GetWM() or false
--- 		if mdl then
--- 			local lh = mdl:LookupBone("ValveBiped.Bip01_L_Forearm")
--- 			if not lh then return end
--- 			local lhmat = mdl:GetBoneMatrix(lh)
--- 			if lhmat then
--- 				return lhmat:GetTranslation()
--- 			end
--- 		end
--- 	end
--- end)

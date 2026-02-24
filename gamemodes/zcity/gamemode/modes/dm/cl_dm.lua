@@ -16,8 +16,6 @@ local snds = {
 	"https://kappa.vgmsite.com/soundtracks/superfighters-deluxe-original-soundtrack-2018/kvlgywwwnt/13.%20Escape.mp3"
 }
 
-local deathmatch_nozone = ConVarExists("deathmatch_nozone") and GetConVar("deathmatch_nozone") or CreateConVar("deathmatch_nozone", 0, FCVAR_REPLICATED, "Allows to disable deathmatch mode zone.", 0, 1)
-
 local function restartMusic()
 	local snd = snds[math.random(#snds)]
 
@@ -65,15 +63,14 @@ hook.Add("Think", "ZoneSoundThink", function()
 	if CurrentRound() and CurrentRound().name ~= "dm" then return end
 	local station = zb.SoundStation
 	if not IsValid(station) then return end
-	if deathmatch_nozone:GetBool() then return end
 	local radius = MODE.GetZoneRadius()
 	local volume = math.Clamp((LocalPlayer():GetPos():Distance(ZonePos) - radius) + 200,0,200) / 200
 	station:SetVolume(volume)
 end)
 
 local fighter = {
-    objective = "Kill everyone.",
-    name = "Fighter",
+    objective = "Убей всех.",
+    name = "Боец",
     color1 = Color(0,120,190)
 }
 
@@ -86,7 +83,7 @@ local mat = Material("hmcd_dmzone")
 local mapsize = 7500
 
 function MODE:PostDrawTranslucentRenderables(bDepth, bSkybox, isDraw3DSkybox)
-	if(!bSkybox and !isDraw3DSkybox) and !deathmatch_nozone:GetBool() then
+	if(!bSkybox and !isDraw3DSkybox)then
 		local radius = MODE.GetZoneRadius()
 		render.SetMaterial(mat)
 		render.DrawSphere( ZonePos, -radius, 60, 60, color_white )
@@ -136,11 +133,11 @@ function MODE:HUDPaint()
 	zb.RemoveFade()
     local fade = math.Clamp(zb.ROUND_START + 8 - CurTime(),0,1)
     
-    draw.SimpleText("Homicide | DeathMatch", "ZB_HomicideMediumLarge", sw * 0.5, sh * 0.1, Color(0,162,255, 255 * fade), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    draw.SimpleText("Homicide | Каждый сам за себя", "ZB_HomicideMediumLarge", sw * 0.5, sh * 0.1, Color(0,162,255, 255 * fade), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     local Rolename = fighter.name
 	local ColorRole = fighter.color1
     ColorRole.a = 255 * fade
-    draw.SimpleText("You are a "..Rolename , "ZB_HomicideMediumLarge", sw * 0.5, sh * 0.5, ColorRole, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    draw.SimpleText("Ты: "..Rolename , "ZB_HomicideMediumLarge", sw * 0.5, sh * 0.5, ColorRole, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 
     local Objective = fighter.objective
     local ColorObj = fighter.color1
@@ -248,7 +245,7 @@ CreateEndMenu = function()
 		surface.SetTextColor(col.r,col.g,col.b,col.a)
 		local lengthX, lengthY = surface.GetTextSize("Close")
 		surface.SetTextPos( lengthX - lengthX/1.1, 4)
-		surface.DrawText("Close")
+		surface.DrawText("Закрыть")
 	end
 
     hmcdEndMenu.PaintOver = function(self,w,h)

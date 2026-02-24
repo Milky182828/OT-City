@@ -64,105 +64,105 @@ local function AppAddModel(strName, strMdl, bFemale, tSubmaterialSlots)
 	}
 end
 
-AppAddModel("Male 01", "models/zcity/m/male_01.mdl", false, {
+AppAddModel("Мужчина 01", "models/zcity/m/male_01.mdl", false, {
 	main = "models/humans/male/group01/players_sheet", -- сделал бы автоматом если бы слоты не отличались...
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Male 02", "models/zcity/m/male_02.mdl", false, {
+AppAddModel("Мужчина 02", "models/zcity/m/male_02.mdl", false, {
 	main = "models/humans/male/group01/players_sheet", -- забудьте я просто шизик, сделал более удобную штуку
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Male 03", "models/zcity/m/male_03.mdl", false, {
+AppAddModel("Мужчина 03", "models/zcity/m/male_03.mdl", false, {
 	main = "models/humans/male/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Male 04", "models/zcity/m/male_04.mdl", false, {
+AppAddModel("Мужчина 04", "models/zcity/m/male_04.mdl", false, {
 	main = "models/humans/male/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Male 05", "models/zcity/m/male_05.mdl", false, {
+AppAddModel("Мужчина 05", "models/zcity/m/male_05.mdl", false, {
 	main = "models/humans/male/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Male 06", "models/zcity/m/male_06.mdl", false, {
+AppAddModel("Мужчина 06", "models/zcity/m/male_06.mdl", false, {
 	main = "models/humans/male/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Male 07", "models/zcity/m/male_07.mdl", false, {
+AppAddModel("Мужчина 07", "models/zcity/m/male_07.mdl", false, {
 	main = "models/humans/male/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Male 08", "models/zcity/m/male_08.mdl", false, {
+AppAddModel("Мужчина 08", "models/zcity/m/male_08.mdl", false, {
 	main = "models/humans/male/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Male 09", "models/zcity/m/male_09.mdl", false, {
+AppAddModel("Мужчина 09", "models/zcity/m/male_09.mdl", false, {
 	main = "models/humans/male/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Female 01", "models/zcity/f/female_01.mdl", true, {
+AppAddModel("Женщина 01", "models/zcity/f/female_01.mdl", true, {
 	main = "models/humans/female/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Female 02", "models/zcity/f/female_02.mdl", true, {
+AppAddModel("Женщина 02", "models/zcity/f/female_02.mdl", true, {
 	main = "models/humans/female/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Female 03", "models/zcity/f/female_03.mdl", true, {
+AppAddModel("Женщина 03", "models/zcity/f/female_03.mdl", true, {
 	main = "models/humans/female/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Female 04", "models/zcity/f/female_04.mdl", true, {
+AppAddModel("Женщина 04", "models/zcity/f/female_04.mdl", true, {
 	main = "models/humans/female/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Female 05", "models/zcity/f/female_07.mdl", true, {
+AppAddModel("Женщина 05", "models/zcity/f/female_07.mdl", true, {
 	main = "models/humans/female/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
 	hands = "distac/gloves/hands"
 })
 
-AppAddModel("Female 06", "models/zcity/f/female_06.mdl", true, {
+AppAddModel("Женщина 06", "models/zcity/f/female_06.mdl", true, {
 	main = "models/humans/female/group01/players_sheet",
 	pants = "distac/gloves/pants",
 	boots = "distac/gloves/cross",
@@ -570,9 +570,7 @@ function plymeta:GetSubMaterialSlots()
 	return slots
 end
 
-local entmeta = FindMetaTable("Entity")
-
-function entmeta:GetSubMaterialIdByName(strName)
+function plymeta:GetSubMaterialIdByName(strName)
 	local mats = self:GetMaterials()
 	local id = false
 	for i = 1, #mats do

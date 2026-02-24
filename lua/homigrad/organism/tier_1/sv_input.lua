@@ -211,39 +211,67 @@ end
 
 --hg.organism.AmputateLimb(Entity(2).organism, "rarm")
 
-function hg.organism.AddWound(ent,tr,bone,dmgInfo,dmgPos,dmgBlood,inputHole, outputHole)
-	local org = ent.organism
-	if org.superfighter then return end
-	
-	local physBone = bone != -1 and bone or math.random(0, ent:GetPhysicsObjectCount() - 1)
-	local bone = ent:TranslatePhysBoneToBone(physBone)
-	dmgPos = ent:GetBonePosition(bone)
-	
-	if bone and dmgBlood > 0 then
+function hg.organism.AddWound(ent,tr,bone,dmgInfo,dmgPos,dmgBlood,inputHole,outputHole)
+	local org = ent and ent.organism
+	if not org or org.superfighter then return end
+	if not IsValid(ent) then return end
+
+	tr = tr or {}
+	local hitNormal = tr.HitNormal
+	if not isvector(hitNormal) then hitNormal = vector_origin end
+
+	local traceNormal = tr.Normal
+	if not isvector(traceNormal) then traceNormal = hitNormal end
+
+	local physBone = (bone ~= -1 and bone) or math.random(0, math.max(ent:GetPhysicsObjectCount() - 1, 0))
+	local boneId = ent:TranslatePhysBoneToBone(physBone)
+	if not boneId then return end
+
+	local bonePos, boneAng = ent:GetBonePosition(boneId)
+	if not isvector(bonePos) or not boneAng then return end
+
+	if not isvector(dmgPos) then
+		local p = ent:GetBonePosition(boneId)
+		if isvector(p) then dmgPos = p else dmgPos = bonePos end
+	end
+
+	if boneId and (dmgBlood or 0) > 0 then
 		for i = 1, 2 do
-			local bonePos, boneAng = ent:GetBonePosition(bone)
-			
-			if not bonePos then return end
+			bonePos, boneAng = ent:GetBonePosition(boneId)
+			if not isvector(bonePos) or not boneAng then return end
 
-			dmgPos = (i == 1 and inputHole[1] or outputHole[1]) or dmgPos
+			local holePos = nil
+			if i == 1 then
+				holePos = inputHole and inputHole[1]
+			else
+				holePos = outputHole and outputHole[1]
+			end
 
-			if i == 2 and not outputHole[1] then continue end
-			if i == 1 and not outputHole[1] then dmgBlood = dmgBlood * 2 end
+			if i == 2 and not holePos then continue end
+			if i == 1 and not (outputHole and outputHole[1]) then dmgBlood = dmgBlood * 2 end
 
-			if dmgInfo:IsDamageType(DMG_BLAST) or dmgInfo:GetAttacker():IsNPC() or (ent:IsPlayer() and ent:InVehicle()) then dmgPos = bonePos end
+			dmgPos = holePos
+			if not isvector(dmgPos) then dmgPos = bonePos end
 
-			local localPos, localAng = WorldToLocal(dmgPos + tr.HitNormal, (i == 1 and -1 or 1) * tr.Normal:Angle(), bonePos, boneAng)
+			local attacker = dmgInfo and dmgInfo.GetAttacker and dmgInfo:GetAttacker() or nil
+			if (dmgInfo and dmgInfo.IsDamageType and dmgInfo:IsDamageType(DMG_BLAST)) or (IsValid(attacker) and attacker.IsNPC and attacker:IsNPC()) or (ent:IsPlayer() and ent:InVehicle()) then
+				dmgPos = bonePos
+			end
+
+			local sign = (i == 1 and -1 or 1)
+			local localPos, localAng = WorldToLocal(dmgPos + hitNormal, (traceNormal:Angle() * sign), bonePos, boneAng)
+
 			if #org.wounds < 30 then
-				table.insert(org.wounds,{dmgBlood / 2, localPos, localAng, ent:GetBoneName(bone), CurTime()})
+				table.insert(org.wounds, {dmgBlood / 2, localPos, localAng, ent:GetBoneName(boneId), CurTime()})
 			else
 				if org.wounds[1] then org.wounds[1][1] = org.wounds[1][1] + dmgBlood / 2 end
 			end
-			
+
 			table.sort(org.wounds, function(a, b) return a[1] > b[1] end)
 
 			if #org.wounds <= 30 then
 				local wounds = org.wounds
-				timer.Create("WoundsSend"..ent:EntIndex(),0.1,1,function()
+				timer.Create("WoundsSend" .. ent:EntIndex(), 0.1, 1, function()
 					local ent = org.owner
 					if IsValid(ent) then
 						ent:SetNetVar("wounds", wounds)
@@ -300,7 +328,7 @@ local headcrabsmodels = {
 	["npc_headcrab_black"] = "models/headcrabblack.mdl",
 }
 
-local hg_norespawn = ConVarExists("hg_norespawn") and GetConVar("hg_norespawn") or CreateConVar("hg_norespawn",0,FCVAR_SERVER_CAN_EXECUTE,"Disable respawns in any gamemode (useful for hg_sync)",0,1)
+local hg_norespawn = ConVarExists("hg_norespawn") and GetConVar("hg_norespawn") or CreateConVar("hg_norespawn",0,FCVAR_SERVER_CAN_EXECUTE,"disable respawns in any gamemodes",0,1)
 
 hook.Add("PlayerDeathThink","stoprespawning",function()
 	if hg_norespawn:GetBool() then return true end
@@ -312,7 +340,7 @@ util.AddNetworkString("hg_bloodimpact")
 --util.AddNetworkString("blood particle explode")
 util.AddNetworkString("bloodsquirt")
 
-local hg_developer = ConVarExists("hg_developer") and GetConVar("hg_developer") or CreateConVar("hg_developer",0,FCVAR_SERVER_CAN_EXECUTE,"Toggle developer mode (enables damage traces)",0,1)
+local hg_developer = ConVarExists("hg_developer") and GetConVar("hg_developer") or CreateConVar("hg_developer",0,FCVAR_SERVER_CAN_EXECUTE,"enable developer mode (enables damage traces)",0,1)
 
 local npcDmg = {
 	npc_combine_s = {
@@ -492,10 +520,6 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 	
 	if org.godmode then return true end
 
-	if ent == ply and IsValid(ply.FakeRagdoll) and dmgInfo:IsDamageType(DMG_BURN) then
-		return true
-	end
-
 	local time = CurTime()
 
 	local inf = IsValid(dmgInfo:GetInflictor()) and not dmgInfo:GetInflictor():IsPlayer() and dmgInfo:GetInflictor() or (dmgInfo:GetAttacker():IsPlayer() and dmgInfo:GetAttacker():GetActiveWeapon()) or dmgInfo:GetAttacker()
@@ -593,8 +617,8 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 		dmgPos = tr.HitPos
 	else
 		tr = util.QuickTrace(dmgPos, -(dmgPos - (ent:GetPos() + ent:OBBCenter())))
+		dir = tr.Normal * pen
 		if tr.Hit and tr.Entity == ent then
-			dir = tr.Normal * pen
 			dmgPos = tr.HitPos
 		end
 	end
@@ -833,15 +857,15 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 			local smallRand = math.Rand(0.0001,0.0002)
 			//org.lungsL[2] = math.min(org.lungsL[2] + bigRand,1)
 			//org.lungsR[2] = math.min(org.lungsR[2] + bigRand,1)
-			org.lungsL[1] = math.min(org.lungsL[1] + bigRand, 1)
-			org.lungsR[1] = math.min(org.lungsR[1] + bigRand, 1)
-			hg.organism.input_list.liver(org, nil, smallRand, dmgInfo)
-			hg.organism.input_list.stomach(org, nil,smallRand, dmgInfo)
-			hg.organism.input_list.intestines(org, nil, smallRand, dmgInfo)
+			org.lungsL[1] = math.min(org.lungsL[1] + bigRand,1)
+			org.lungsR[1] = math.min(org.lungsR[1] + bigRand,1)
+			hg.organism.input_list.liver(org,nil,smallRand,dmgInfo)
+			hg.organism.input_list.stomach(org,nil,smallRand,dmgInfo)
+			hg.organism.input_list.intestines(org,nil,smallRand,dmgInfo)
 			hg.AddHarmToAttacker(dmgInfo, bigRand, "Burns harm")
 			--org.liver = math.min(org.liver + math.Rand(0.0005,0.0008),1) 
 			--org.stomach = math.min(org.stomach + math.Rand(0.0005,0.0008),1) 
-			//org.trachea = math.min(org.trachea + smallRand, 1)
+			org.trachea = math.min(org.trachea + smallRand,1)
 		end
 	else
 		local sfd = org.fakePlayer and ent or ply
@@ -992,18 +1016,9 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 			should = org.dmgstack[hitgroup][1] > hitgroup_max
 			--print(rag, should, hitgroup == HITGROUP_HEAD, bonename, hitgroup, HITGROUP_HEAD)
 			if should and hitgroup == HITGROUP_HEAD then
-				--[[if not IsValid(ply) then
-					ply = hg.RagdollOwner(rag)
-				end
-				if not isbool(ply) then
-					hook.Run("OnHeadExplode", ply, rag)
-				end]]
-
 				Gib_Input(rag, rag:TranslatePhysBoneToBone(bone), dirCool * len)
 
 				rag.headexploded = true
-				org.headamputated = true
-				rag.organism.headamputated = true
 
 				org.dmgstack[hitgroup][1] = nil
 				org.dmgstack[hitgroup][2] = nil
@@ -1035,9 +1050,6 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 
 			org.dmgstack[hitgroup][1] = nil
 			org.dmgstack[hitgroup][2] = nil
-
-			org.owner.fullsend = true
-			hg.send_bareinfo(org)
 		end)
 	end)
 
@@ -1064,7 +1076,7 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 	if org.isPly then
 		hook.Run("Org Think Call", ply, org)
 		
-		if (not ply:Alive() or not org.alive) and (math.Round(ply:GetInfoNum("hg_deathfadeout", 1)) == 1) then// or org.otrub or hg.organism.paincheck(org) or (ply:Health() <= 0) then
+		if not ply:Alive() or not org.alive then// or org.otrub or hg.organism.paincheck(org) or (ply:Health() <= 0) then
 			if org.skull == 1 then
 				//ent:SetNWString("PlayerName", "Unidentifiable person")
 			end
@@ -1099,23 +1111,10 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 		end
 	end
 	
-	if ply and !ply:GetNetVar("headcrab") and (ply.PlayerClassName != "Gordon" or ply.armors.head != "gordon_helmet") and ply.PlayerClassName ~= "headcrabzombie" then
+	if ply and !ply:GetNetVar("headcrab") and (ply.PlayerClassName != "Gordon" or ply.armors.head != "gordon_helmet") then
 		local class = dmgInfo:GetAttacker():GetClass()
-
+		
 		if dmgInfo:GetAttacker():IsNPC() and headcrabs[class] then
-			local armors = ply:GetNetVar("Armor",{})
-			local isHelm = armors["head"] and !hg.armor["head"][armors["head"]].nodrop
-			local isMask = armors["face"] and !hg.armor["face"][armors["face"]].nodrop
-
-			if isHelm or isMask then
-				hg.DropArmorForce(ply, isHelm and armors["head"] or armors["face"])
-				ply.ArmorCD = CurTime() + 5
-
-				return
-			end
-
-			ply.PreZombClass = ply.PlayerClassName
-
 			ply:AddHeadcrab(headcrabsmodels[class])
 			
 			dmgInfo:GetAttacker():Remove()
@@ -1123,12 +1122,6 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 	end
 	
 	return true
-end)
-
-hook.Add("CanEquipArmor", "HeadcrabArmorCD", function(ply, armor_name)
-	if IsValid(ply) and ((ply.ArmorCD or 0) > CurTime() or ply:GetNetVar("headcrab")) then
-		return false
-	end
 end)
 
 local paintable = {
@@ -1390,7 +1383,6 @@ local function velocityDamage(ent, data)
 		//dmg = dmg * math.max(data.HitObject:GetMass()*(speed/50000),5)
 	end
 	
-	if !ent.organism then return end
 	if dmg * 20 < 0.1 then return end
 	dmg = dmg * 1.5
 
@@ -1421,7 +1413,6 @@ local function velocityDamage(ent, data)
 	-- 100 is kil
 	
 	local ply = hg.RagdollOwner(ent)
-
 	local traceResult = GetTraceDamage(ent, data.HitPos, -(data.OurOldVelocity - data.TheirOldVelocity))
 	
 	if not bone then
@@ -1452,8 +1443,8 @@ local function velocityDamage(ent, data)
 		if hitgroup == HITGROUP_STOMACH and (dmg * 3 > 0.25) then hg.organism.input_list.pelvis(org, bone, dmg * 3, dmgInfo) end
 		local physAng = data.PhysObject:GetAngles()
 		
-		if hitgroup == HITGROUP_STOMACH and physAng:Forward():Dot(data.HitNormal) > 0.6 then hg.organism.input_list.spine1(org, bone, dmg * (math.random(3) > 1 and 1 or 0) * 3, dmgInfo) end -- | И В ПРАВДУ ПОЧЕМУ У НАС СПИНА ЛОМАЕТСЯ ОТ ПАДЕНИЯ НА ГРУДЬ ИЛИ ЖИВОТ...
-		if hitgroup == HITGROUP_CHEST and physAng:Forward():Dot(data.HitNormal) > 0.6 then hg.organism.input_list.spine2(org, bone, dmg * (math.random(3) > 1 and 1 or 0) * 3, dmgInfo) end
+		if hitgroup == HITGROUP_STOMACH and physAng:Forward():Dot(data.HitNormal) > 0.6 then  hg.organism.input_list.spine1(org, bone, dmg * (math.random(3) > 1 and 1 or 0) * 3, dmgInfo) end -- | И В ПРАВДУ ПОЧЕМУ У НАС СПИНА ЛОМАЕТСЯ ОТ ПАДЕНИЯ НА ГРУДЬ ИЛИ ЖИВОТ...
+		if hitgroup == HITGROUP_CHEST and physAng:Forward():Dot(data.HitNormal) > 0.6 then  hg.organism.input_list.spine2(org, bone, dmg * (math.random(3) > 1 and 1 or 0) * 3, dmgInfo) end
 
 
 		--print(dmg * 3, dmg * 80)
@@ -1469,17 +1460,16 @@ local function velocityDamage(ent, data)
 		org.owner:AddNaturalAdrenaline( math.min( dmg * 0.5, 4) )
 
 		if hitgroup == HITGROUP_HEAD then
-			local hadhelmet = org.owner.armors and org.owner.armors["head"] != nil
+			hg.organism.input_list.skull(org, bone, dmg * 6, dmgInfo)
 			
-			hg.organism.input_list.skull(org, bone, dmg * 6 * (hadhelmet and 0.2 or 1), dmgInfo)
-			
-			org.consciousness = math.Approach(org.consciousness, 0, dmg * 20 * (hadhelmet and 0.2 or 1))
+			org.consciousness = math.Approach(org.consciousness, 0, dmg * 20)
 			
 			local neck_not_broken = org.spine3 < 0.8
 			
 			//if dmg > 0.5 then
-				hg.organism.input_list.spine3(org, bone, dmg * (math.random(4) == 1 and 1 or 0) * 3 * (hadhelmet and 0.5 or 1), dmgInfo)
+				hg.organism.input_list.spine3(org, bone, dmg * (math.random(4) == 1 and 1 or 0) * 3, dmgInfo)
 			//end
+			local hadhelmet = ent.armors and ent.armors["head"] != nil
 			if dmg * 10 > 0.5 and !hadhelmet then
 				org.otrub = true
 				org.shock = org.shock + 10
@@ -1501,19 +1491,6 @@ local function velocityDamage(ent, data)
 	end
 
 	hook_Run("HomigradDamage", ent, dmgInfo, hitgroup, ent, att.harm, {}, {})
-	
-	if org.isPly and ply then
-		hook.Run("Org Think Call", ply, org)
-		
-		if (not ply:Alive() or not org.alive) and (math.Round(ply:GetInfoNum("hg_deathfadeout", 1)) == 1) then// or org.otrub or hg.organism.paincheck(org) or (ply:Health() <= 0) then
-			if org.skull == 1 then
-				//ent:SetNWString("PlayerName", "Unidentifiable person")
-			end
-			
-			ply:ScreenFade(0, color_black, 1, 1)
-			ply:ConCommand("soundfade 100 99999")
-		end
-	end
 
 	timer.Create("send_info_org"..ent:EntIndex(),0.01,1,function()
 		if !IsValid(ent) then return end
@@ -1574,7 +1551,7 @@ function hg.BreakNeck(ent)
 end
 
 hook.Add("OnAmputateLimb", "amputate_cuffs", function(org, ent, limb)
-	if (limb == "larm" or limb == "rarm") and (org.handcuffed and ent:GetNetVar("handcuffed", false)) then
+	if limb == "larm" or limb == "rarm" and (ent.handcuffed or ent:GetNetVar("handcuffed", false)) then
 		if ent.handcuffs then
 			if IsValid(ent.handcuffs[1]) then ent.handcuffs[1]:Remove() end
 			if IsValid(ent.handcuffs[2]) then ent.handcuffs[2]:Remove() end

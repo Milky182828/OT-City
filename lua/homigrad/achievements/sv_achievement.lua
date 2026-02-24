@@ -134,7 +134,7 @@ end
 util.AddNetworkString("hg_NewAchievement")
 
 function hg.achievements.SetPlayerAchievement(ply, key, val)
-    --print("Triggered achievement for player " .. ply:Name() .. " ; " .. ply:SteamID() .. ": " .. (key or "none") .. ", value " .. (val or "none"))
+    print("Triggered achievement for player " .. ply:Name() .. " ; " .. ply:SteamID() .. ": " .. (key or "none") .. ", value " .. (val or "none"))
     local steamID = ply:SteamID64()
     hg.achievements.achievements_data.player_achievements[steamID] = hg.achievements.achievements_data.player_achievements[steamID] or {}
     local playerAchievements = hg.achievements.achievements_data.player_achievements[steamID]
@@ -171,21 +171,21 @@ end)
 
 //if !hg.init_ach then
     -- braindeath
-    hg.achievements.CreateAchievementType("brain",1,0,"Die from hypoxia.","I will definitely survive...", nil, false)
+    hg.achievements.CreateAchievementType("brain",1,0,"Умереть от гипоксии.","я обязательно выживу...", nil, false)
     -- death from drugs
-    hg.achievements.CreateAchievementType("drugs",1,0,"Die from opioids overdose.","Overstimulated", nil, false)
+    hg.achievements.CreateAchievementType("drugs",1,0,"Смерть от передозировки опиоидов.","Перевозбужденный", nil, false)
     -- TERMINATOR
-    hg.achievements.CreateAchievementType("illbeback",3,0,"Get shot in the head and get up alive.","I'll be back", nil, true)
+    hg.achievements.CreateAchievementType("illbeback",3,0,"Получить пулю в голову и остаться живим.","Я обязательно вернусь", nil, true)
     -- kill everyone
-    hg.achievements.CreateAchievementType("killemall",1,0,"Kill everyone being a traitor and win the round\nplayers on the server should be more than 9.","Kill Em All", nil, false)
+    hg.achievements.CreateAchievementType("killemall",1,0,"Убейте всех предателей и выиграйте раунд. На сервере должно быть больше 9 игроков","Убей их всех", nil, false)
     -- russian roulette
-    hg.achievements.CreateAchievementType("deadlygambling",10,0,"Survive 10 games of Russian roulette in one life.","Deadly Gambling", nil, true)
+    hg.achievements.CreateAchievementType("deadlygambling",10,0,"Пережить 10 партий в русскую рулетку за одну жизнь.","Смертельные азартные игры", nil, true)
     -- lobotomized kill
-    hg.achievements.CreateAchievementType("lobotomygaming",1,0,"Kill the traitor while having brain damage","Hydrogen bomb vs Lobotomized patient", nil, false)
+    hg.achievements.CreateAchievementType("lobotomygaming",1,0,"Убить предателя, имея повреждение мозга.","Водородная бомба против пациента после лоботомии", nil, false)
     -- hot potato
-    hg.achievements.CreateAchievementType("hotpotato",1,0,"Kill the traitor using his own grenade","Hot Potato", nil, false)
+    hg.achievements.CreateAchievementType("hotpotato",1,0,"Убейте предателя, используя его собственную гранату.","Горячий картофель", nil, false)
     -- please calm down
-    hg.achievements.CreateAchievementType("bking", 1, 0, "Something terrible happened on that plane...", "Sir please calm down", nil, false)
+    hg.achievements.CreateAchievementType("bking", 1, 0, "На том самолёте произошло нечто ужасное....", "Сэр, пожалуйста, успокойтесь", nil, false)
 
     //hg.init_ach = true
 //end

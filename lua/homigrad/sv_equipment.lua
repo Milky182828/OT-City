@@ -1,6 +1,12 @@
 util.AddNetworkString("hg_add_equipment")
 util.AddNetworkString("hg_drop_equipment")
 
+local function hgEnsureArmors(ent)
+	if not IsValid(ent) then return end
+	if not istable(ent.armors) then ent.armors = {} end
+	if not istable(ent.armors_health) then ent.armors_health = {} end
+end
+
 function hg.SetArmorRestrictions(ply, restrictions)
 	if not IsValid(ply) then return end
 	ply.ArmorRestrictions = restrictions
@@ -42,11 +48,13 @@ net.Receive("hg_drop_equipment", function(len, ply)
 
     if not ply.organism.canmove then return end
 
+	hgEnsureArmors(ply)
     hg.DropArmor(ply, equipment)
 end)
 
 function hg.AddArmor(ply, equipment, ent)
     if not IsValid(ply) then return end
+	hgEnsureArmors(ply)
 
 	if not hg.CanEquipArmorPiece(ply, equipment) then
 		if ply:IsPlayer() then
@@ -128,6 +136,7 @@ function hg.AddArmor(ply, equipment, ent)
 end
 
 function hg.DropArmorForce(ent, equipment)
+	hgEnsureArmors(ent)
     if not table.HasValue(ent.armors, equipment) then return false end
     local placement
     for plc, tbl in pairs(hg.armor) do
@@ -168,6 +177,7 @@ function hg.DropArmorForce(ent, equipment)
 end
 
 function hg.DropArmor(ply, equipment)
+	hgEnsureArmors(ply)
     if not table.HasValue(ply.armors, equipment) then return false end
     
     local placement
@@ -223,6 +233,7 @@ util.AddNetworkString("AddFlash")
 local ArmorEffect
 local force
 local function protec(org, bone, dmg, dmgInfo, placement, armor, scale, scaleprot, punch, boneindex, dir, hit, ricochet)
+	hgEnsureArmors(org.owner)
 	if not force and org.owner.armors[placement] ~= armor then return 0 end
 	force = nil
 	
@@ -264,7 +275,7 @@ local function protec(org, bone, dmg, dmgInfo, placement, armor, scale, scalepro
 	dmgInfo:SetDamageType(DMG_CLUB)
 	dmgInfo:SetDamageForce(dmgInfo:GetDamageForce() * 0.4)
 	dmgInfo:ScaleDamage(0.2)
-
+	
 	return 0.9
 end
 
@@ -369,12 +380,12 @@ hg.organism.input_list.mask1 = function(org, bone, dmg, dmgInfo, ...)
 end
 
 hg.organism.input_list.mask3 = function(org, bone, dmg, dmgInfo, ...)
-	local protect = protec(org, bone, dmg, dmgInfo, "face", "mask3", 0.95, 0.92, true, ...)
+	local protect = protec(org, bone, dmg, dmgInfo, "face", "mask3", 1, 1, true, ...)
 	return protect
 end
 
 hg.organism.input_list.vest5 = function(org, bone, dmg, dmgInfo, ...)
-	local protect = protec(org, bone, dmg, dmgInfo, "torso", "vest5", 0.8, 0.5, false, ...)
+	local protect = protec(org, bone, dmg, dmgInfo, "torso", "vest5", 0.8, 0.6, false, ...)
 	return protect
 end
 hg.organism.input_list.vest6 = function(org, bone, dmg, dmgInfo, ...)
@@ -383,7 +394,7 @@ hg.organism.input_list.vest6 = function(org, bone, dmg, dmgInfo, ...)
 end
 
 hg.organism.input_list.vest7 = function(org, bone, dmg, dmgInfo, ...)
-	local protect = protec(org, bone, dmg, dmgInfo, "torso", "vest7", 0.8, 0.5, false, ...)
+	local protect = protec(org, bone, dmg, dmgInfo, "torso", "vest7", 0.7, 0.4, false, ...)
 	return protect
 end
 
@@ -521,8 +532,11 @@ hg.organism.input_list.protovisor = function(org, bone, dmg, dmgInfo, ...)
 	return protect
 end
 
-hook.Add("HG_ReplacePhrase", "MaskMuffed", function(ply, phrase, muffed, pitch)
-	if IsValid(ply) and ply.armors and ply.armors["face"] == "mask2" then
-		return ply, phrase, true, pitch
-	end
+hook.Add("HG_ReplacePhrase", "MaskMuffed", function(ent, phrase, muffed, pitch)
+    if not IsValid(ent) then return end
+    hgEnsureArmors(ent) -- гарантирует ent.armors и ent.armors_health
+
+    if ent.armors["face"] == "mask2" then
+        return ent, phrase, true, pitch
+    end
 end)

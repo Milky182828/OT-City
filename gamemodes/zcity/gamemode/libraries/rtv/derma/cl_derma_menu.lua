@@ -8,7 +8,7 @@ BlurBackground = hg.DrawBlur
 
 function PANEL:Paint( w, h )
 
-    local text = "Time to Rock The Vote"
+    local text = "Время голосования"
 
 	BlurBackground(self)
 
@@ -18,7 +18,7 @@ function PANEL:Paint( w, h )
 	surface.SetTextPos( w / 2 - lengthX/2,20 )
 	surface.DrawText( text )
 
-	surface.SetDrawColor( 255, 0, 0, 128)
+	surface.SetDrawColor( 43, 255, 0, 128)
     surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 
 end

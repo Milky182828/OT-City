@@ -142,9 +142,6 @@ hg.ConVars = hg.ConVars or {}
 	end
 
 	hook.Add("PostCleanupMap","fuckclientsidemodels",hg.ClearClientsideModels)
-	hook.Add("PostCleanupMap","remove_this_stupid_clside_ragdolls",function()
-		for k,v in ipairs(ents.FindByClass('class C_ClientRagdoll')) do v:Remove() end
-	end)
 --//
 
 --\\ Fake status info for scare mode
@@ -340,7 +337,7 @@ players : 1 humans, 0 bots (20 max)
 			[ "$pp_colour_mulb" ] = 0
 		}
 
-		local hg_potatopc = GetConVar("hg_potatopc") or CreateClientConVar("hg_potatopc", "0", true, false, "Toggle potato (low-end pc) mode", 0, 1)
+		local hg_potatopc = GetConVar("hg_potatopc") or CreateClientConVar("hg_potatopc", "0", true, false, "enable this if you are noob", 0, 1)
 
 		hg.ConVars.potatopc = hg_potatopc
 
@@ -402,10 +399,8 @@ players : 1 humans, 0 bots (20 max)
 		if CLIENT then
 			lply = IsValid(lply) and lply or LocalPlayer()
 			local entities = hg.seenents
-			
-			for i = 1, #entities do
-				ent = entities[i]
-				
+
+			for _, ent in ipairs(entities) do
 				if not IsValid(ent) or (ent:IsPlayer() and not ent:Alive()) or IsValid(ent.FakeRagdoll) then continue end
 				--print(ent, CurTime())
 				local ply = ent:IsPlayer() and ent or IsValid(ent.ply) and ent.ply
@@ -474,7 +469,7 @@ players : 1 humans, 0 bots (20 max)
 --//
 
 --\\ custom sens
-	local hg_zoomsensitivity = ConVarExists("hg_zoomsensitivity") and GetConVar("hg_zoomsensitivity") or CreateConVar("hg_zoomsensitivity", 1, FCVAR_ARCHIVE, "Multiply aiming zoom sensivity", 0, 3)
+	local hg_zoomsensitivity = ConVarExists("hg_zoomsensitivity") and GetConVar("hg_zoomsensitivity") or CreateConVar("hg_zoomsensitivity", 1, FCVAR_ARCHIVE, "aiming zoom sensitifity multiplier", 0, 3)
 
 	hook.Add("AdjustMouseSensitivity", "AdjustRunSensivityHUY", function(defaultSensitivity)
 		if not lply:Alive() then return end--kakoy sencivity NOOB
@@ -650,13 +645,32 @@ players : 1 humans, 0 bots (20 max)
 			if not talker:IsSpeaking() then return end
 			if not IsValid(listener) or not IsValid(talker) or listener == talker then return end
 
+			local entr = talker
+
+			local distance = listener:GetPos():Distance(talker:GetPos())
+
+			if distance > 900000 then return end
+
 			local trace = util.TraceLine({
 				start = listener:EyePos(),
-				endpos = talker:EyePos(),
+				endpos = entr:EyePos(),
 				mask = MASK_SOLID_BRUSHONLY,
 			})
 
-			local volume = (talker:WaterLevel() == 3) and 0.25 or (trace.Hit and 0.5 or 1)
+			local volume = 1
+			local mute = 0.5
+
+			if distance < 200 then
+				mute = math.min(0.5 * 2, 1)
+			end
+			if talker:WaterLevel() == 3 then
+				mute = math.max(0.5 / 2, 0)
+			end
+			if trace.Hit or talker:WaterLevel() == 3 then
+				volume = (((distance / 900000) * -1) + 1) * mute
+			else
+				volume = (((distance / 900000) * -1) + 1)
+			end
 
 			talker:SetVoiceVolumeScale(!hg.muteall and math.min(hg.playerInfo[talker:SteamID()] and hg.playerInfo[talker:SteamID()][2] or 1, volume) or 0)
 		end
@@ -667,18 +681,16 @@ players : 1 humans, 0 bots (20 max)
 			ply:SetVoiceVolumeScale(!hg.muteall and (!hg.mutespect or ply:Alive()) and (hg.playerInfo[ply:SteamID()] and hg.playerInfo[ply:SteamID()][2] or 1) or 0)
 
 			if not ply:Alive() then return end
-			
 			local ent = IsValid(ply.FakeRagdoll) and ply.FakeRagdoll or ply
-			
 			if ply:VoiceVolume() != 0 then
 				if (ply.timedupdate or 0) < CurTime() then
-					UpdateVoiceDSP(lply, ply)
+					UpdateVoiceDSP(LocalPlayer(), ply)
 					
 					ply.timedupdate = CurTime() + 0.5
 				end
 			end
 
-			if lply:GetPos():DistToSqr(ent:GetPos()) > 1500 * 1500 then return end
+			if LocalPlayer():GetPos():Distance(ent:GetPos()) > 1500 then return end
 			
 			local flexes = {
 				[1] = ent:GetFlexIDByName( "jaw_drop" ),
@@ -715,20 +727,14 @@ players : 1 humans, 0 bots (20 max)
 				ent.Blinking = cachedLerp(FrameTime() * 5,ent.Blinking or 0,1)
 			end
 
-			if ply.suiciding then
-				ent.Blinking = 1
-			end
-			
-			if ent:GetFlexIDByName("blink") then
+			if ent:IsRagdoll() and ent:GetFlexIDByName("blink") then
 				ent:SetFlexWeight(ent:GetFlexIDByName("blink"), ent.Blinking or 0)
-			end
-
-			if ent:GetFlexIDByName("wrinkler") then
-				ent:SetFlexWeight(ent:GetFlexIDByName("wrinkler"), ent.Blinking or 0)
-			end
-
-			if ent:GetFlexIDByName("half_closed") then
-				ent:SetFlexWeight(ent:GetFlexIDByName("half_closed"), ent.Blinking or 0)
+				if ent:GetFlexIDByName("wrinkler") then
+					ent:SetFlexWeight(ent:GetFlexIDByName("wrinkler"), ent.Blinking or 0)
+				end
+				if ent:GetFlexIDByName("half_closed") then
+					ent:SetFlexWeight(ent:GetFlexIDByName("half_closed"), ent.Blinking or 0)
+				end
 			end
 		end
 
@@ -881,7 +887,11 @@ players : 1 humans, 0 bots (20 max)
 		local function AddTinnitus(time, needSound)
 			lply = LocalPlayer()
 			lply.tinnitus = CurTime() + time * 4
-			lply:SetDSP(32)
+			lply:SetDSP(32) -- 36
+			if needSound then -- not used anyway :3
+				//lply:EmitSound("earringing_end.wav")
+				//zcitysnd/real_sonar/tinnitus1.mp3
+			end
 		end
 
 		local plymeta = FindMetaTable("Player")
@@ -896,19 +906,4 @@ players : 1 humans, 0 bots (20 max)
 			AddTinnitus(time,bool)
 		end)
 	end
---//
-
---\\ Remove CLIENT side hit particles
-	hook.Add("ScalePlayerDamage","remove_cl_hit_particles",function()
-		return !game.SinglePlayer() -- i hate singleplayer in gmod. WHY I SHOULD DO THIS STUPID IDIOTIC SHIT, i hate it.
-	end)
---//
-
---\\ Remove sfbreath effect
-	hook.Add("Think","RemoveSF2_breath",function()
-		hook.Remove("PostPlayerDraw", "StormFox2.Effect.Breath")
-		timer.Remove("StormFox2.Effect.BreathT")
-
-		hook.Remove("Think","RemoveSF2_breath")
-	end)
 --//

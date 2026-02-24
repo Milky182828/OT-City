@@ -151,7 +151,6 @@ function SWEP:AnimHold()
 	self.holdtype = ((self:IsPistolHoldType() or self.CanEpicRun) and ((ply.posture == 7 or ply.posture == 8 or self:IsSprinting()) or (self:IsPistolHoldType() and ply.posture == 9) and not self.reload)) and "slam" or self.holdtype
 	self.holdtype = ((ply:IsFlagSet(FL_ANIMDUCKING)) and self.holdtype == "rpg") and "smg" or self.holdtype
 	self.holdtype = (self:IsPistolHoldType() and (self:GetButtstockAttack() - CurTime() > -0.5)) and "melee" or self.holdtype
-	--self.holdtype = (!self:IsPistolHoldType() and ply.posture == 2 and "revolver" or self.holdtype)
 	--self.holdtype = self:ReadyStance() and not self:IsPistolHoldType() and "pistol" or self.holdtype
 	self:SetHold(self.holdtype)
 
@@ -167,10 +166,8 @@ function SWEP:AnimHold()
 		progress = math.ease.OutBack(progress)
 	end
 
-	if progress > 0 then
-		self:BoneSet("spine1", vecZero, Angle(0, 0, progress * 25), "buttstockattack", 0.0001)
-		self:BoneSet("head", vecZero, Angle(0, 0, -progress * 25), "buttstockattack", 0.0001)
-	end
+	self:BoneSet("spine1", vecZero, Angle(0, 0, progress * 25), "buttstockattack", 0.0001)
+	self:BoneSet("head", vecZero, Angle(0, 0, -progress * 25), "buttstockattack", 0.0001)
 
 	local func = hg.postureFunctions[ply.posture] or funcNil
 
@@ -198,9 +195,7 @@ function SWEP:AnimZoom()
 	angZoom1[1] = self:IsZoom() and (-angZoom1[1] * 50) or 0
 	angZoom1[1] = self:IsZoom() and math.Clamp(angZoom1[1],-20,20) or 0
 	
-	if !angZoom1:IsEqualTol(angle_zero, 0.01) then
-		self:BoneSet("head", vecZero, angZoom1, "aiming", 0.1)
-	end
+	self:BoneSet("head", vecZero, angZoom1, "aiming", 0.1)
 end
 
 local math_max, math_Clamp = math.max, math.Clamp
@@ -346,13 +341,12 @@ hook.Add("Bones", "homigrad-lean-bone", function(ply, dtime)
 	ply.weightmul = weightmul or hg.CalculateWeight(ply, 140)
 	
 	local mul = ply.weightmul ^ 2
-	local ragdollcombat = hg.RagdollCombatInUse(ply)
 	local isragdoll = IsValid(ply.FakeRagdoll) and !IsValid(ply:GetNWEntity("FakeRagdollOld"))
-	local left = ((isragdoll and !ragdollcombat and hg.KeyDown(ply, IN_MOVERIGHT)) or hg.KeyDown(ply, IN_ALT2)) and not hg.KeyDown(ply, IN_ALT1)
-	local right = ((isragdoll and !ragdollcombat and hg.KeyDown(ply, IN_MOVELEFT)) or hg.KeyDown(ply, IN_ALT1)) and not hg.KeyDown(ply, IN_ALT2)
+	local left = ((isragdoll and hg.KeyDown(ply, IN_MOVERIGHT)) or hg.KeyDown(ply, IN_ALT2)) and not hg.KeyDown(ply, IN_ALT1)
+	local right = ((isragdoll and hg.KeyDown(ply, IN_MOVELEFT)) or hg.KeyDown(ply, IN_ALT1)) and not hg.KeyDown(ply, IN_ALT2)
 
 	ply.lean = Lerp(
-		hg.lerpFrameTime( ( left or right ) and 0.045 * ply:GetNetVar("leanSpeedMul",1) or 0.075, dtime * game.GetTimeScale()), 
+		hg.lerpFrameTime( ( left or right ) and 0.045 * ply:GetNetVar("leanSpeedMul",1) or 0.075, dtime), 
 		ply.lean or 0,
 		hg.IsLocal(ply) and ( (left and right and 0) or (left and 1.3) or (right and -1.3) or 0) or ply:GetNWFloat("PlayerLean", 0)
 	)

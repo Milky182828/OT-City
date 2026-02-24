@@ -36,7 +36,7 @@ function zb.RTVMenu()
         MapButton:SetSize(0, ScrH() * 0.06)
         
         if v == "random" then
-            MapButton:SetText("Random Map")
+            MapButton:SetText("Рамдомная карта")
             MapButton.Map = "random"
             MapButton.MapIcon = Material("icon64/random.png")
             if MapButton.MapIcon:IsError() then
@@ -85,7 +85,7 @@ function zb.RTVMenu()
         surface.DrawOutlinedRect(0, 0, w, h, 2.5)
 
         local x, y = w / 2, h / 2
-        local txt = "Exit"
+        local txt = "Выйти"
         surface.SetFont("HomigradFont")
         surface.SetTextColor(255, 255, 255, 255)
         local tw, th = surface.GetTextSize(txt)
