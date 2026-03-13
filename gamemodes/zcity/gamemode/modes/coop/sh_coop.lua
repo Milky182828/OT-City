@@ -35,5 +35,5 @@ MODE.Maps = {
     ["d1_town_03"] = {PlayerEqipment = "rebel"},
     ["d1_town_04"] = {PlayerEqipment = "rebel"},
     ["d1_town_05"] = {PlayerEqipment = "rebel"},
-    ["d2_*"] = {PlayerEqipment = "rebel"}
+    ["d2_*"] = {PlayerEqipment = "rebels"}
 }
