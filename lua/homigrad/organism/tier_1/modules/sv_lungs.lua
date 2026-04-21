@@ -125,11 +125,11 @@ concommand.Add("-hmcd_holdbreath",function(ply)
 end)
 
 local lowoxy = {
-	"I'm gonna faint right now... There's not enough oxygen.",
-	"There's not enough oxygen... I can't hold much longer...",
-	"I really need some fresh air...",
-	"I'm gasping for air...",
-	"Need to breathe air... or I'm gonna faint right here..."
+	"Я сейчас упаду в обморок… Здесь не хватает кислорода.",
+	"Здесь не хватает кислорода… Я долго не продержусь…",
+	"Мне очень нужен свежий воздух…",
+	"Я задыхаюсь…",
+	"Мне нужно вдохнуть воздуха… или я прямо здесь потеряю сознание…"
 }
 
 local not_enough_intake = {
@@ -137,27 +137,27 @@ local not_enough_intake = {
 	//"I gotta take a break...",
 	//"Need a break from this... to breathe...",
 	//"Resting sounds like a nice idea.",
-	"I need to breathe...",
-	"I'm struggling to breathe...",
+	"мне нужно дышать...",
+	"мне тяжело дышать...",
 }
 
 local drop_mask = {
-	"I can't breathe in this mask... I need to take it off.",
-	"Drop the mask, it's not worth it...",
-	"It's fucking disgusting... and I surely can't breathe in this...",
-	"Fucking stinks... Gotta take this mask off...",
+	"Я не могу дышать в этой маске... Мне нужно снять ее.",
+	"Сбрось маску, это не стоит того...",
+	"Это отвратительно... и я точно не могу дышать в этой...",
+	"Черт возьми, воняет... Нужно снять эту маску...",
 }
 
 local drugged = {
-	"Ohhh hohoohoooo Ie-like it.....",
-	"Fukkenh awesomee..... ffffeeelin gooooood..",
-	"That's theh sStuffff DUDeeee",
-	"I reallly like whatEvER I'm feeling right now....",
-	"Oh yeahhhh this feels gooood!",
-	"I want to feel likhe this for theRRRREST of my life",
-	"Why am I here even?.. wWhatever whuhhh heh",
-	"Whoa re you? Gett outtaheree...",
-	"Don't want anything else... this is pERRRfect!..",
+	"Оооо хохохоооо… мне нрравится.....",
+	"Чёррт… просто офигееннно..... чууувствую себя тааак хорошо..",
+	"Воот это тееема, чувааак",
+	"Мнне ооочень нравится то, что я сейчааас чувствую....",
+	"Ооо дааааа, это так приятно!",
+	"Хочу чувствовать себя тааак всю осттааавшуюся жизнь",
+	"Почему я вообще здесь?.. да каакая разнница, хех",
+	"Эй, ктто ты? Убббирайся отссюда...",
+	"Мне больше ниччего не нужно... это идеааально!.."
 }
 
 local bit_band,util_PointContents = bit.band,util.PointContents
@@ -251,7 +251,7 @@ module[2] = function(owner, org, timeValue)
 	if org.isPly and not org.otrub and o2.curregen < losing_oxy and org.analgesia <= 1.5 then
 		if mask_blevota then
 			if o2[1] < 15 then
-				org.owner:Notify("DROP THE FUCKING MASK", 25, "take_gasmask2", 0, nil, color_red2)
+				org.owner:Notify("Выбраси нахуй эту маску", 25, "take_gasmask2", 0, nil, color_red2)
 			else
 				org.owner:Notify(drop_mask[math.random(#drop_mask)], 15, "take_gasmask", 0)
 			end
@@ -265,7 +265,7 @@ module[2] = function(owner, org, timeValue)
 			org.owner:Notify(lowoxy[math.random(#lowoxy)], 30, "lowoxy", 0, nil, color_red3)
 	
 			if o2[1] < 6 then
-				org.owner:Notify("Oxygen... please...", 30, "lowoxy2", 0, nil, color_red)
+				org.owner:Notify("Кислород... пожалуйста...", 30, "lowoxy2", 0, nil, color_red)
 			end
 		end
 	end
@@ -298,19 +298,19 @@ module[2] = function(owner, org, timeValue)
 
 	if org.isPly then
 		if org.pneumothorax > 0 then
-			org.owner:Notify("I can feel something filling my lungs.", true, "pneumothorax1",10) // delay of 10 seconds before typing that
+			org.owner:Notify("Я чувствую, как что-то заполняет мои лёгкие.", true, "pneumothorax1",10) // delay of 10 seconds before typing that
 		else
 			org.owner:ResetNotification("pneumothorax1")
 		end
 
 		if org.pneumothorax > 0.3 then
-			org.owner:Notify("It's getting harder to breathe.", true, "pneumothorax2", 5)
+			org.owner:Notify("Становится всё труднее дышать.", true, "pneumothorax2", 5)
 		else
 			org.owner:ResetNotification("pneumothorax2")
 		end
 
 		if org.pneumothorax > 0.5 then
-			org.owner:Notify("I'm really struggling to breathe.", true, "pneumothorax3", 5)
+			org.owner:Notify("Я действительно испытываю трудности с дыханием.", true, "pneumothorax3", 5)
 		else
 			org.owner:ResetNotification("pneumothorax3")
 		end
@@ -375,7 +375,7 @@ module[2] = function(owner, org, timeValue)
 
 	if org.isPly then
 		if org.brain > 0.1 and org.brain < 0.3 then
-			org.owner:Notify(math.random(2) == 1 and "My head hurts..." or "Where am I?", true, "brain", 5)
+			org.owner:Notify(math.random(2) == 1 and "Моя голова болит..." or "Где я?", true, "brain", 5)
 		else
 			org.owner:ResetNotification("brain") 
 		end

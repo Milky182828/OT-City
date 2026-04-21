@@ -489,96 +489,96 @@ local UTF8MB4 = "ALTER DATABASE %s CHARACTER SET = utf8mb4 COLLATE = utf8mb4_uni
 function mysql:Connect(host, username, password, database, port, socket, flags)
 	port = port or 3306
 
-	if (self.module == "mysqloo") then
-		if (!istable(mysqloo)) then
-			require("mysqloo")
-		end
-		--self.connection = nil
-		if (mysqloo) then
+	if self.module == "mysqloo" then
+		if not istable(mysqloo) then require("mysqloo") end
+		if not mysqloo then ErrorNoHalt(string.format(MODULE_NOT_EXIST, self.module)) return end
 
-			if (self.connection and self.connection:ping()) then
-				return
-			end
-			--print
-			local clientFlag = flags or 0
+		if self.connection and self.connection:ping() then return end
 
-			if (!isstring(socket)) then
-				self.connection = mysqloo.connect(host, username, password, database, port)
-			else
-				self.connection = mysqloo.connect(host, username, password, database, port, socket, clientFlag)
-			end
-
-			self.connection.onConnected = function(connection)
-		        local success, error_message = connection:setCharacterSet("utf8mb4")
-
-		        if (!success) then
-					ErrorNoHalt("Failed to set MySQL encoding!\n")
-					ErrorNoHalt(error_message .. "\n")
-				else
-					self:RawQuery(string.format(UTF8MB4, database))
-		        end
-
-				mysql:OnConnected()
-			end
-
-			self.connection.onConnectionFailed = function(database, errorText)
-				mysql:OnConnectionFailed(errorText)
-			end
-
-			self.connection:connect()
-
-			timer.Create("mysql.KeepAlive", 300, 0, function()
-				self.connection:ping()
-			end)
+		local clientFlag = flags or 0
+		if not isstring(socket) then
+			self.connection = mysqloo.connect(host, username, password, database, port)
 		else
-			ErrorNoHalt(string.format(MODULE_NOT_EXIST, self.module))
+			self.connection = mysqloo.connect(host, username, password, database, port, socket, clientFlag)
 		end
-	elseif (self.module == "sqlite") then
+
+		self.connection.onConnected = function(connection)
+			local ok, err = connection:setCharacterSet("utf8mb4")
+			if ok then
+				self:RawQuery(string.format(UTF8MB4, database))
+			else
+				ErrorNoHalt("Failed to set MySQL encoding!\n")
+				ErrorNoHalt((err or "unknown error") .. "\n")
+			end
+			self:OnConnected()
+		end
+
+		self.connection.onConnectionFailed = function(_, errorText)
+			self.connection = nil
+			self:OnConnectionFailed(errorText)
+		end
+
+		self.connection:connect()
+
+		timer.Remove("mysql.KeepAlive")
+		timer.Create("mysql.KeepAlive", 300, 0, function()
+			if self.connection and self.connection:ping() then return end
+			if self.connection then
+				pcall(function() self.connection:disconnect(true) end)
+			end
+		end)
+
+	elseif self.module == "sqlite" then
 		timer.Simple(0, function()
-			mysql:OnConnected()
+			self:OnConnected()
 		end)
 	end
 end
 
 -- A function to query the MySQL database.
 function mysql:RawQuery(query, callback, flags, ...)
-	if (self.module == "mysqloo") then
-		local queryObj = self.connection:query(query)
+	if self.module == "mysqloo" then
+		if not self:IsConnected() then
+			self:Queue(query, callback)
+			return
+		end
 
+		local queryObj = self.connection:query(query)
 		queryObj:setOption(mysqloo.OPTION_NAMED_FIELDS)
 
-		queryObj.onSuccess = function(queryObj, result)
-			if (callback) then
-				local bStatus, value = pcall(callback, result, true, tonumber(queryObj:lastInsert()))
-
-				if (!bStatus) then
-					error(string.format("[mysql] MySQL Callback Error!\n%s\n", value))
+		queryObj.onSuccess = function(q, result)
+			if callback then
+				local ok, val = pcall(callback, result, true, tonumber(q:lastInsert()))
+				if not ok then
+					error(string.format("[mysql] MySQL Callback Error!\n%s\n", val))
 				end
 			end
 		end
 
-		queryObj.onError = function(queryObj, errorText)
+		queryObj.onError = function(_, errorText)
 			ErrorNoHalt(string.format("[mysql] MySQL Query Error!\nQuery: %s\n%s\n", query, errorText))
 		end
 
 		queryObj:start()
-	elseif (self.module == "sqlite") then
-		local result = sql.Query(query)
+		return
+	end
 
-		if (result == false) then
+	if self.module == "sqlite" then
+		local result = sql.Query(query)
+		if result == false then
 			error(string.format("[mysql] SQL Query Error!\nQuery: %s\n%s\n", query, sql.LastError()))
 		else
-			if (callback) then
-				local bStatus, value = pcall(callback, result, true, tonumber(sql.QueryValue("SELECT last_insert_rowid()")))
-
-				if (!bStatus) then
-					error(string.format("[mysql] SQL Callback Error!\n%s\n", value))
+			if callback then
+				local ok, val = pcall(callback, result, true, tonumber(sql.QueryValue("SELECT last_insert_rowid()")))
+				if not ok then
+					error(string.format("[mysql] SQL Callback Error!\n%s\n", val))
 				end
 			end
 		end
-	else
-		ErrorNoHalt(string.format("[mysql] Unsupported module \"%s\"!\n", self.module))
+		return
 	end
+
+	ErrorNoHalt(string.format("[mysql] Unsupported module \"%s\"!\n", tostring(self.module)))
 end
 
 -- A function to add a query to the queue.
@@ -590,13 +590,13 @@ end
 
 -- A function to escape a string for MySQL.
 function mysql:Escape(text)
-	if (self.connection) then
-		if (self.module == "mysqloo") then
+	if self.module == "mysqloo" then
+		if self.connection then
 			return self.connection:escape(text)
 		end
-	else
-		return sql.SQLStr(text, true)
+		return tostring(text)
 	end
+	return sql.SQLStr(text, true)
 end
 
 -- A function to disconnect from the MySQL database.
@@ -609,19 +609,20 @@ function mysql:Disconnect()
 end
 
 function mysql:Think()
-	if (#QueueTable > 0) then
-		if (istable(QueueTable[1])) then
-			local queueObj = QueueTable[1]
-			local queryString = queueObj[1]
-			local callback = queueObj[2]
+	if #QueueTable <= 0 then return end
+	if self.module == "mysqloo" and not self:IsConnected() then return end
 
-			if (isstring(queryString)) then
-				self:RawQuery(queryString, callback)
-			end
+	local queueObj = QueueTable[1]
+	if not istable(queueObj) then table.remove(QueueTable, 1) return end
 
-			table.remove(QueueTable, 1)
-		end
+	local queryString = queueObj[1]
+	local callback = queueObj[2]
+
+	if isstring(queryString) then
+		self:RawQuery(queryString, callback)
 	end
+
+	table.remove(QueueTable, 1)
 end
 
 -- A function to set the module that should be used.
@@ -645,7 +646,15 @@ end
 
 -- A function to check whether or not the module is connected to a database.
 function mysql:IsConnected()
-	return self.module == "mysqloo" and (self.connection and self.connection:ping()) or self.module == "sqlite"
+	if self.module == "sqlite" then return true end
+	if self.module ~= "mysqloo" then return false end
+	return self.connection ~= nil and self.connection:ping()
 end
+
+hook.Add("Think", "mysql.ProcessQueue", function()
+	if mysql and mysql.Think then
+		mysql:Think()
+	end
+end)
 
 return mysql

@@ -141,6 +141,7 @@ hook.Add("HG_PlayerSay", "furrifyPhraseOwO", function(ply, txt)
 end)
 
 hook.Add("HG_PlayerCanHearPlayersVoice","BrainDamage", function(listener, speaker)
+	if speaker.sam_gagged then return false, false end
 	if speaker.organism.brain > 0.05 then return false, false end
 end)
 
@@ -152,6 +153,7 @@ local braindeadphrase_female = {
 	"vo/episode_1/npc/female01/cit_behindyousfx01.wav",
 	"vo/episode_1/npc/female01/cit_behindyousfx02.wav",
 }
+
 hook.Add("HG_ReplacePhrase", "BraindeadPhrase", function(ent, phrase, muffed, pitch)
 	if ent.organism.brain >= 0.5 then
 		local phr = ThatPlyIsFemale(ent) and braindeadphrase_female[math.random(#braindeadphrase_female)] or braindeadphrase_male[math.random(#braindeadphrase_male)]
@@ -160,17 +162,18 @@ hook.Add("HG_ReplacePhrase", "BraindeadPhrase", function(ent, phrase, muffed, pi
 end)
 
 hook.Add("PlayerCanHearPlayersVoice", "RealisticVoice", function(listener,speaker)
+	if speaker.sam_gagged then return false, false end
+
 	local result,is3D = ChatLogic(speaker,listener,false,false)
 	local speak = speaker:IsSpeaking()
 	speaker.IsSpeak = speak
 	
 	if speaker.IsOldSpeak ~= speaker.IsSpeak then
 		speaker.IsOldSpeak = speak
-		--print("huy")
-		if speak then hook.Run( "StartVoice", speaker, listener ) else hook.Run( "EndVoice", speaker, listener )  end
+		if speak then hook.Run("StartVoice", speaker, listener) else hook.Run("EndVoice", speaker, listener) end
 	end
 
-	local Hook = hook.Run("HG_PlayerCanHearPlayersVoice", listener, speaker )
+	local Hook = hook.Run("HG_PlayerCanHearPlayersVoice", listener, speaker)
 	if Hook ~= nil then
 		return Hook
 	end

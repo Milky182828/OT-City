@@ -1,4 +1,3 @@
-
 hg.achievements = hg.achievements or {}
 hg.achievements.achievements_data = hg.achievements.achievements_data or {}
 hg.achievements.achievements_data.player_achievements = hg.achievements.achievements_data.player_achievements or {}
@@ -8,85 +7,126 @@ hg.achievements.MenuPanel = hg.achievements.MenuPanel or nil
 
 local CreateMenuPanel
 
-concommand.Add("hg_achievements",function()
+concommand.Add("hg_achievements", function()
     CreateMenuPanel()
 end)
 
 BlurBackground = BlurBackground or hg.DrawBlur
 local gradient_u = Material("vgui/gradient-u")
-local function PaintButton(self,w,h)
-	BlurBackground(self)
-    surface.SetDrawColor(0, 255, 179, 155)
-    surface.SetMaterial(gradient_u)
-    surface.DrawTexturedRect( 0, 0, w, h )
+local gradient_d = Material("vgui/gradient-d")
 
-	surface.SetDrawColor( 17, 155, 91, 128)
-    surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
+local function GetPlayerAchievements()
+    local sid = tostring(LocalPlayer():SteamID())
+    hg.achievements.achievements_data.player_achievements[sid] = hg.achievements.achievements_data.player_achievements[sid] or {}
+    return hg.achievements.achievements_data.player_achievements[sid]
 end
 
-local function createButton(frame, ach, text, func)
+local function GetAchievementProgress(ach)
+    local localach = GetPlayerAchievements()
+    local data = localach[ach.key] or {}
+    local startValue = tonumber(ach.start_value) or 0
+    local neededValue = tonumber(ach.needed_value) or 1
+    local value = tonumber(data.value) or startValue
+    local progress = math.Clamp(neededValue > 0 and (value / neededValue) or 0, 0, 1)
+    local complete = value >= neededValue
+    return value, neededValue, progress, complete
+end
+
+local function PaintFrame(self, w, h)
+    BlurBackground(self)
+    surface.SetDrawColor(18, 28, 24, 240)
+    draw.RoundedBox(0, 0, 0, w, h, Color(18, 28, 24, 240))
+    surface.SetDrawColor(0, 255, 179, 20)
+    surface.SetMaterial(gradient_d)
+    surface.DrawTexturedRect(0, 0, w, h)
+    surface.SetDrawColor(0, 255, 179, 90)
+    surface.DrawOutlinedRect(0, 0, w, h, 2)
+end
+
+local function PaintButton(self, w, h)
+    BlurBackground(self)
+    local hovered = self:IsHovered()
+    self.hoverLerp = Lerp(FrameTime() * 10, self.hoverLerp or 0, hovered and 1 or 0)
+    draw.RoundedBox(0, 0, 0, w, h, Color(12, 18, 16, 230))
+    surface.SetDrawColor(0, 255, 179, 35 + 35 * self.hoverLerp)
+    surface.SetMaterial(gradient_u)
+    surface.DrawTexturedRect(0, 0, w, h)
+    surface.SetDrawColor(0, 255, 179, 70 + 90 * self.hoverLerp)
+    surface.DrawOutlinedRect(0, 0, w, h, 2)
+end
+
+local function createButton(frame, ach, func)
     local button = vgui.Create("DButton", frame)
 
     ach.img = isstring(ach.img) and Material(ach.img) or ach.img
-    
-    local localach = hg.achievements.GetLocalAchievements()
-    --PrintTable(localach)
-    local desc = markup.Parse("<font=HomigradFontMedium>"..ach.description.."<font>", 500 )
-    
-    local x,y = frame:LocalToScreen(button:GetPos())
-    function button:Paint(w,h)
-		PaintButton(self,w,h)
-        local view = render.GetViewSetup(true)
-        local pos,ang = view.origin,view.angles
-        ang:RotateAroundAxis( ang:Up(), -90 )
-	    ang:RotateAroundAxis( ang:Forward(), 90 )
-        
-        self.lerpcolor = Lerp(FrameTime() * 10,self.lerpcolor or 0,self:IsHovered() and 255 or 0)
-       
-        local val = localach[ach.key] and localach[ach.key].value or ach.start_value
-        local amt = ScreenScale(1)
+    local desc = markup.Parse("<font=HomigradFontMedium>" .. (ach.description or "Нет описания") .. "</font>", 900)
 
-        --[[surface.SetDrawColor(71,36,48,(val / ach.needed_value) == 1 and 255 or 0)
-        surface.SetMaterial(ach.img)
-        surface.DrawTexturedRect(amt * 5,amt * 5,h - amt * 10,h - amt * 10)--]]
+    function button:Paint(w, h)
+        PaintButton(self, w, h)
 
-        surface.SetFont("HomigradFont") 
-        local txt = ach.name..(ach.showpercent and " | " or "")..(ach.showpercent and (val / ach.needed_value * 100).."%" or "")
-        local wt,ht = surface.GetTextSize(txt)
-        surface.SetTextColor(255,255,255)
-        surface.SetTextPos(w / 2 - (wt / 2), (ht / 2) * (1-(self.lerpcolor / 255)*5))
-        surface.DrawText(txt)
+        local value, neededValue, progress, complete = GetAchievementProgress(ach)
+        local percent = math.Round(progress * 100)
+        local pad = ScreenScale(5)
+        local iconSize = h - pad * 4
+        local textX = pad * 3 + iconSize
+        local barW = w - textX - pad * 3
+        local barH = ScreenScale(5)
 
-       --surface.SetFont("HomigradFontMedium")
-       --local wt,ht = surface.GetTextSize(ach.description)
-       --surface.SetTextColor(255,255,255,255)
-       --surface.SetTextPos(w / 2 - wt / 2,h - ((h/2)+ht/2) * (self.lerpcolor / 255))
-        --surface.DrawText(ach.description)
-        desc:Draw(w / 2,(h + desc:GetHeight()) - ((h/2) + desc:GetHeight()) * (self.lerpcolor / 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        if ach.img then
+            surface.SetDrawColor(255, 255, 255, complete and 255 or 220)
+            surface.SetMaterial(ach.img)
+            surface.DrawTexturedRect(pad * 2, pad * 2, iconSize, iconSize)
+            surface.SetDrawColor(0, 255, 179, complete and 160 or 70)
+            surface.DrawOutlinedRect(pad * 2, pad * 2, iconSize, iconSize, 2)
+        end
 
-        surface.SetDrawColor(255,255,255,10)
+        surface.SetFont("HomigradFont")
+        local title = ach.name or "Без названия"
+        surface.SetTextColor(255, 255, 255)
+        surface.SetTextPos(textX, pad * 1)
+        surface.DrawText(title)
+
+        local stateText = complete and "Получено" or "В процессе"
+        surface.SetFont("HomigradFontMedium")
+        local stateW = surface.GetTextSize(stateText)
+        surface.SetTextColor(complete and 120 or 220, 255, complete and 120 or 220)
+        surface.SetTextPos(w - stateW - pad * 3, pad * 2)
+        surface.DrawText(stateText)
+
+        local progressText = tostring(value) .. " / " .. tostring(neededValue)
+        if ach.showpercent then
+            progressText = progressText .. "   (" .. percent .. "%)"
+        end
+
+        surface.SetFont("HomigradFontMedium")
+        surface.SetTextColor(230, 230, 230)
+        surface.SetTextPos(textX, ScreenScale(14))
+        surface.DrawText(progressText)
+
+        local progressY = ScreenScale(22)
+        draw.RoundedBox(0, textX, progressY, barW, barH, Color(0, 0, 0, 180))
+        draw.RoundedBox(0, textX, progressY, math.max(barW * progress, 4), barH, complete and Color(90, 255, 120) or Color(0, 220, 170))
+        surface.SetDrawColor(255, 255, 255, 10)
+        surface.DrawOutlinedRect(textX, progressY, barW, barH, 1)
+
+        desc:Draw(textX, progressY + barH + ScreenScale(1), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+
+        local glowX = w - 120 + self.hoverLerp * 35
+        surface.SetDrawColor(255, 255, 255, 12 + 18 * self.hoverLerp)
         draw.NoTexture()
-        surface.DrawTexturedRectRotated(w - self.lerpcolor / 255 * 100 + 50,0,10,400,-30)
-        surface.DrawTexturedRectRotated(w - self.lerpcolor / 255 * 100 + 80,0,10,400,-30)
+        surface.DrawTexturedRectRotated(glowX, 0, 14, h * 1.8, -30)
+        surface.DrawTexturedRectRotated(glowX + 28, 0, 10, h * 1.8, -30)
     end
 
     button:SetText("")
-    button:SetSize(0,ScreenScale(22))
+    button:SetTall(ScreenScale(46))
     button:Dock(TOP)
-    button:DockMargin(0,0,0,ScreenScale(2.5))
-    button.DoClick = function(self) func(self) end
+    button:DockMargin(0, 0, 0, ScreenScale(3))
+    button.DoClick = function(self)
+        func(self)
+    end
+
     return button
-end
-
-local gradient_d = Material("vgui/gradient-d")
-local function PaintFrame(self,w,h)
-	BlurBackground(self)
-    surface.SetDrawColor(50, 0, 0, 155)
-    surface.SetMaterial(gradient_d)
-    surface.DrawTexturedRect( 0, 0, w, h )
-
-	surface.SetDrawColor( 11, 230, 3, 128)
-    surface.DrawOutlinedRect( 0, 0, w, h, 2.5 )
 end
 
 CreateMenuPanel = function()
@@ -97,77 +137,126 @@ CreateMenuPanel = function()
         hg.achievements.MenuPanel = nil
     end
 
-    local frame = vgui.Create( "ZFrame" )
+    local frame = vgui.Create("ZFrame")
     hg.achievements.MenuPanel = frame
     frame:SetTitle("")
-    frame:SetSize( ScrW() / 3, ScrH() / 2 )
-    frame:SetPos( ScrW() * 0.5 - frame:GetWide() * 0.5,ScrH() + 500 )
+    frame:SetSize(ScrW() * 0.55, ScrH() * 0.72)
+    frame:SetPos(ScrW() * 0.5 - frame:GetWide() * 0.5, ScrH() + 500)
     frame:MakePopup()
     frame:SetKeyboardInputEnabled(false)
-    local pad = ScreenScale(15)
-    local pad2 = ScreenScale(5)
-    frame:DockPadding(pad2,pad,pad2,pad)
-    frame.OnClose = function() frame = nil end 
     frame:SetAlpha(0)
+    frame.OnClose = function()
+        frame = nil
+    end
 
-    frame:MoveTo(frame:GetX(), ScrH() / 2 - frame:GetTall() / 2, 0.5, 0, 0.3, function() end)
-    frame:AlphaTo( 255, 1, 0, nil )
+    local pad = ScreenScale(8)
+    local headerH = ScreenScale(26)
+    frame:DockPadding(pad, pad, pad, pad)
 
-	function frame:Paint( w,h )
-        PaintFrame(self,w,h)
+    frame:MoveTo(frame:GetX(), ScrH() * 0.5 - frame:GetTall() * 0.5, 0.5, 0, 0.3)
+    frame:AlphaTo(255, 0.25, 0)
+
+    function frame:Paint(w, h)
+        PaintFrame(self, w, h)
     end
 
     function frame:Close()
-        self:MoveTo(frame:GetX(), ScrH() + 500, 0.5, 0, 0.3, function()
+        self:MoveTo(self:GetX(), ScrH() + 500, 0.5, 0, 0.3, function()
             self:Remove()
         end)
-        self:AlphaTo( 0, 0.1, 0, nil )
+        self:AlphaTo(0, 0.1, 0)
         self:SetKeyboardInputEnabled(false)
         self:SetMouseInputEnabled(false)
     end
 
-    local scroll = vgui.Create("DScrollPanel",frame)
+    local header = vgui.Create("DPanel", frame)
+    header:Dock(TOP)
+    header:SetTall(headerH)
+
+    function header:Paint(w, h)
+        draw.RoundedBox(0, 0, 0, w, h, Color(8, 14, 12, 220))
+        surface.SetDrawColor(0, 255, 179, 30)
+        surface.SetMaterial(gradient_u)
+        surface.DrawTexturedRect(0, 0, w, h)
+        surface.SetDrawColor(0, 255, 179, 80)
+        surface.DrawOutlinedRect(0, 0, w, h, 1)
+
+        local created = hg.achievements.achievements_data.created_achevements or {}
+        local localach = GetPlayerAchievements()
+        local total = table.Count(created)
+        local unlocked = 0
+
+        for _, ach in pairs(created) do
+            local data = localach[ach.key]
+            local value = tonumber(data and data.value) or tonumber(ach.start_value) or 0
+            local needed = tonumber(ach.needed_value) or 1
+            if value >= needed then
+                unlocked = unlocked + 1
+            end
+        end
+
+        surface.SetFont("HomigradFont")
+        surface.SetTextColor(255, 255, 255)
+        surface.SetTextPos(ScreenScale(4), ScreenScale(2))
+        surface.DrawText("Достижения")
+
+        local info = "Открыто: " .. unlocked .. " / " .. total
+        surface.SetFont("HomigradFontMedium")
+        local wt = surface.GetTextSize(info)
+        surface.SetTextColor(200, 255, 235)
+        surface.SetTextPos(w - wt - ScreenScale(4), ScreenScale(4))
+        surface.DrawText(info)
+    end
+
+    local scroll = vgui.Create("DScrollPanel", frame)
     scroll:Dock(FILL)
+    scroll:DockMargin(0, ScreenScale(3), 0, 0)
     frame.scroll = scroll
 
     local sbar = scroll:GetVBar()
     sbar:SetHideButtons(true)
+
     function sbar:Paint(w, h)
         draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 100))
     end
+
     function sbar.btnGrip:Paint(w, h)
-        self.lerpcolor = Lerp(FrameTime() * 10, self.lerpcolor or 0.2,(self:IsHovered() and 0.8 or 0.6))
-        draw.RoundedBox(0, 0, 0, w, h, Color(100 * self.lerpcolor, 10, 10))
+        self.lerpcolor = Lerp(FrameTime() * 10, self.lerpcolor or 0.2, self:IsHovered() and 0.9 or 0.65)
+        draw.RoundedBox(0, 0, 0, w, h, Color(0, 210 * self.lerpcolor, 160 * self.lerpcolor, 220))
     end
 
-    --function frame:Paint(w,h)
-    --    (self)
-    --    BlurBackground--surface.SetFont("HomigradFontMedium")
-    --    --local name = "Achievements"
-    --    --local wt,ht = surface.GetTextSize(name)
-    --    --surface.SetTextColor(255,255,255)
-    --    --surface.SetTextPos(15,0)
-    --    --surface.DrawText(name)
---
-    --    surface.SetDrawColor(col1)
-    --    surface.DrawOutlinedRect( 0, 0, w, h, 1 )
-    --end
-
     function frame:UpdateValues()
-        local scroll = self.scroll
-        scroll:Clear()
-        
-        for i,ach in pairs(hg.achievements.achievements_data.created_achevements) do
-            scroll:AddItem(createButton(scroll, ach, ach.name, function() end))
+        self.scroll:Clear()
+
+        local achievements = hg.achievements.achievements_data.created_achevements or {}
+        local sorted = {}
+
+        for _, ach in pairs(achievements) do
+            table.insert(sorted, ach)
+        end
+
+        table.sort(sorted, function(a, b)
+            local _, _, pa, ca = GetAchievementProgress(a)
+            local _, _, pb, cb = GetAchievementProgress(b)
+            if ca ~= cb then
+                return ca
+            end
+            if pa ~= pb then
+                return pa > pb
+            end
+            return (a.name or "") < (b.name or "")
+        end)
+
+        for _, ach in ipairs(sorted) do
+            self.scroll:AddItem(createButton(self.scroll, ach, function() end))
         end
     end
 
-    for i,ach in pairs(hg.achievements.achievements_data.created_achevements) do
-        scroll:AddItem(createButton(scroll, ach, ach.name, function() end))
-    end
+    frame:UpdateValues()
 end
 
 local time_wait = 0
+
 function hg.achievements.LoadAchievements()
     if time_wait > CurTime() then return end
     time_wait = CurTime() + 2
@@ -180,64 +269,69 @@ function hg.achievements.GetLocalAchievements()
     return hg.achievements.achievements_data.player_achievements[tostring(LocalPlayer():SteamID())]
 end
 
-net.Receive("req_ach",function()
+net.Receive("req_ach", function()
     hg.achievements.achievements_data.created_achevements = net.ReadTable()
     hg.achievements.achievements_data.player_achievements[tostring(LocalPlayer():SteamID())] = net.ReadTable()
-    
+
     if IsValid(hg.achievements.MenuPanel) then
         hg.achievements.MenuPanel:UpdateValues()
     end
 end)
+
 hg.achievements.NewAchievements = hg.achievements.NewAchievements or {}
-local AchTable = hg.achievements.NewAchievements 
-net.Receive("hg_NewAchievement",function()
-    local Ach = {time = CurTime() + 7.5,name = net.ReadString(),img = net.ReadString()}
-    table.insert(AchTable,1,Ach)
-	surface.PlaySound("homigrad/vgui/achievement_earned.wav")
-    --sound.PlayURL("https://www.myinstants.com/media/sounds/achievement_earned.mp3","noblock",function(station)
-    --    if IsValid(station) then
-    --        station:Play()
-    --    end 
-    --end)
+local AchTable = hg.achievements.NewAchievements
+
+net.Receive("hg_NewAchievement", function()
+    local Ach = {
+        time = CurTime() + 7.5,
+        name = net.ReadString(),
+        img = net.ReadString()
+    }
+
+    table.insert(AchTable, 1, Ach)
+    surface.PlaySound("homigrad/vgui/achievement_earned.wav")
 end)
 
--- AchTable[1] = {time = CurTime() + 991,name = "Hello Everyone",img = "achievements/marksman"}
--- AchTable[2] = {time = CurTime() + 992,name = "John 'Alabama' Slasher",img = "achievements/bloodysouvenir"}
--- AchTable[3] = {time = CurTime() + 993,name = "Nab",img = "achievements/toxicfumes"}
--- AchTable[4] = {time = CurTime() + 994,name = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis pulvinar, elit in eleifend euismod, massa metus eleifend massa",img = "achievements/bunny"}
--- AchTable[5] = {time = CurTime() + 995,name = "Hello Everyone",img = "homigrad/vgui/models/star.png"}
-local ach_clr1 , ach_clr2 = Color(8,221,79), Color(100,25,25)
-hook.Add("HUDPaint","hg_NewAchievement", function()
+local ach_clr1, ach_clr2 = Color(8, 221, 79), Color(100, 25, 25)
+
+hook.Add("HUDPaint", "hg_NewAchievement", function()
     local frametime = FrameTime() * 10
+
     for i = 1, #AchTable do
         local ach = AchTable[i]
         if not ach then continue end
-        local txt = "Achievement! "..ach.name
-        ach.img = isstring(ach.img) and Material(ach.img) or ach.img
-        local wt, _ = surface.GetTextSize(txt)
 
-        ach.Lerp = Lerp( frametime, ach.Lerp or 0, math.min( ach.time - CurTime(), 1 ) * i )
-        WSize, HSize = (ScrW() * 0.1) + (wt), ScrH() * 0.05
-        local HPos = ScrH() - ( HSize * ach.Lerp )
-        draw.RoundedBox( 0, 2, HPos + 2, WSize - 4, HSize - 4, ach_clr2 )
-		
-		surface.SetDrawColor(6, 243, 65)
-		surface.SetMaterial(gradient_u)
-		surface.DrawTexturedRect( 0, HPos, WSize, HSize )
-	
-		surface.SetDrawColor( 1, 255, 77)
-		surface.DrawOutlinedRect( 0, HPos, WSize, HSize, 2.5 )
+        local txt = "Достижение! " .. ach.name
+        ach.img = isstring(ach.img) and Material(ach.img) or ach.img
 
         surface.SetFont("HomigradFontMedium")
-        surface.SetTextColor(255,255,255)
-        surface.SetTextPos(HSize*1.25,(HPos + ( HSize/2 ) - ( HSize/4 )) )
+        local wt, ht = surface.GetTextSize(txt)
+
+        ach.Lerp = Lerp(frametime, ach.Lerp or 0, math.min(ach.time - CurTime(), 1) * i)
+
+        local WSize = math.max(ScrW() * 0.18, wt + ScrH() * 0.06)
+        local HSize = ScrH() * 0.06
+        local HPos = ScrH() - (HSize * ach.Lerp)
+
+        draw.RoundedBox(0, 2, HPos + 2, WSize - 4, HSize - 4, ach_clr2)
+        surface.SetDrawColor(6, 243, 65)
+        surface.SetMaterial(gradient_u)
+        surface.DrawTexturedRect(0, HPos, WSize, HSize)
+        surface.SetDrawColor(1, 255, 77)
+        surface.DrawOutlinedRect(0, HPos, WSize, HSize, 2.5)
+
+        surface.SetTextColor(255, 255, 255)
+        surface.SetTextPos(HSize * 1.15, HPos + (HSize / 2) - (ht / 2))
         surface.DrawText(txt)
-        surface.SetDrawColor(255,255,255)
-        surface.SetMaterial(ach.img)
-        surface.DrawTexturedRect(2,HPos+2,HSize-4,HSize-4)
-        if ach.time < CurTime() then 
-            table.remove(AchTable,i)
-            --PrintTable(AchTable)
+
+        if ach.img then
+            surface.SetDrawColor(255, 255, 255)
+            surface.SetMaterial(ach.img)
+            surface.DrawTexturedRect(2, HPos + 2, HSize - 4, HSize - 4)
+        end
+
+        if ach.time < CurTime() then
+            table.remove(AchTable, i)
         end
     end
 end)

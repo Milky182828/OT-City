@@ -26,3 +26,7 @@ function GAMEMODE:ScalePlayerDamage( ply, hitgroup, dmginfo )
 	end
 
 end
+
+//
+//
+//

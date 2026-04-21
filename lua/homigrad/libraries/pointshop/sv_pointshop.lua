@@ -6,18 +6,90 @@ local ADMINS_GET_POINTS = true
 
 local PLUGIN = hg.Pointshop
 PLUGIN.PlayerInstances = PLUGIN.PlayerInstances or {}
-
--- =========================================================
--- ВАЖНО:
--- DonPoints (донат-поинты) теперь берём НЕ из hg_pointshop,
--- а из твоей системы баланса RK_Balance (таблица rk_donate_balance).
--- hg_pointshop хранит только: points + items
--- =========================================================
+PLUGIN.Active = PLUGIN.Active or false
 
 local function EnsureRKBalance()
-    if not RK_Balance or not isfunction(RK_Balance.Load) or not isfunction(RK_Balance.Add) then
-        error("[Z-City Shop] RK_Balance not found. Load RK donate balance system BEFORE pointshop.")
+    if RK_Balance and isfunction(RK_Balance.Load) and isfunction(RK_Balance.Add) then return true end
+
+    if not mdata then
+        print("[Z-City Shop] RK_Balance не найден и mdata тоже не найден. Донат-поинты будут недоступны, пока не загрузится mdata.")
+        return false
     end
+
+    RK_Balance = RK_Balance or {}
+
+    if not isfunction(RK_Balance.Load) then
+        function RK_Balance.Load(ply)
+            if not IsValid(ply) then return end
+            local function apply()
+                if not IsValid(ply) then return end
+                local v = 0
+                if mdata and mdata.IsLoaded and mdata:IsLoaded(ply) then
+                    v = tonumber(ply:GetMData("rk_donate_balance", 0)) or 0
+                end
+                ply.RK_DonateBalance = math.max(0, v)
+            end
+
+            if mdata and mdata.IsLoaded and mdata:IsLoaded(ply) then
+                apply()
+                return
+            end
+
+            local sid = ply:SteamID64()
+            local tries = 0
+            timer.Create("ZCity_RKBalanceWait_" .. tostring(sid), 0.25, 80, function()
+                if not IsValid(ply) then timer.Remove("ZCity_RKBalanceWait_" .. tostring(sid)) return end
+                tries = tries + 1
+                if mdata and mdata.IsLoaded and mdata:IsLoaded(ply) then
+                    apply()
+                    timer.Remove("ZCity_RKBalanceWait_" .. tostring(sid))
+                    return
+                end
+                if tries >= 80 then
+                    apply()
+                    timer.Remove("ZCity_RKBalanceWait_" .. tostring(sid))
+                end
+            end)
+        end
+    end
+
+    if not isfunction(RK_Balance.Add) then
+        function RK_Balance.Add(ply, delta)
+            if not IsValid(ply) then return end
+            delta = tonumber(delta) or 0
+            if delta == 0 then
+                RK_Balance.Load(ply)
+                return
+            end
+
+            local cur = tonumber(ply.RK_DonateBalance) or 0
+
+            if mdata and mdata.IsLoaded and mdata:IsLoaded(ply) then
+                cur = tonumber(ply:GetMData("rk_donate_balance", cur)) or cur
+            end
+
+            local newv = math.max(0, cur + delta)
+
+            ply.RK_DonateBalance = newv
+
+            if mdata then
+                ply:SetMData("rk_donate_balance", newv)
+            end
+        end
+    end
+
+    if not RK_Balance.__zcity_mdata_hooked then
+        RK_Balance.__zcity_mdata_hooked = true
+        if mdata and isfunction(mdata.AddCallback) then
+            mdata:AddCallback("rk_donate_balance", function(ply, val)
+                if not IsValid(ply) then return end
+                ply.RK_DonateBalance = math.max(0, tonumber(val) or 0)
+            end)
+        end
+    end
+
+    print("[Z-City Shop] RK_Balance не найден. Подключён совместимый слой на mdata (rk_donate_balance).")
+    return true
 end
 
 local function PS_RefreshDonPoints(ply)
@@ -26,23 +98,15 @@ local function PS_RefreshDonPoints(ply)
     if not PLUGIN.PlayerInstances[sid64] then
         PLUGIN.PlayerInstances[sid64] = { donpoints = 0, points = 0, items = {} }
     end
-
-    -- берём из RK_Balance (который тянет из MySQL)
     PLUGIN.PlayerInstances[sid64].donpoints = math.max(0, tonumber(ply.RK_DonateBalance) or 0)
 end
 
--- =========================================================
--- Таблица hg_pointshop: создаём БЕЗ donpoints (donpoints теперь в rk_donate_balance)
--- Если у тебя уже есть donpoints в таблице hg_pointshop - ничего страшного, мы просто не используем.
--- =========================================================
 hook.Add("DatabaseConnected", "PointshopCreateData", function()
     EnsureRKBalance()
 
     local query = mysql:Create("hg_pointshop")
         query:Create("steamid", "VARCHAR(20) NOT NULL")
         query:Create("steam_name", "VARCHAR(32) NOT NULL")
-        -- donpoints убираем из логики, но можно оставить в таблице если уже есть:
-        -- query:Create("donpoints", "FLOAT NOT NULL")
         query:Create("points", "FLOAT NOT NULL")
         query:Create("items", "TEXT NOT NULL")
         query:PrimaryKey("steamid")
@@ -59,7 +123,14 @@ hook.Add("PlayerInitialSpawn", "Pointshop_OnInitSpawn", function(ply)
     local steamID64 = ply:SteamID64()
 
     if not PLUGIN.Active then
-        PLUGIN.PlayerInstances[steamID64] = {donpoints=0, points=0, items={}}
+        PLUGIN.PlayerInstances[steamID64] = { donpoints = 0, points = 0, items = {} }
+        RK_Balance.Load(ply)
+        timer.Simple(0.5, function()
+            if not IsValid(ply) then return end
+            PS_RefreshDonPoints(ply)
+            hook.Run("PS_PlayerLoaded", ply, steamID64)
+            PLUGIN:NET_SendPointShopVars(ply)
+        end)
         return
     end
 
@@ -68,7 +139,7 @@ hook.Add("PlayerInitialSpawn", "Pointshop_OnInitSpawn", function(ply)
         query:Select("items")
         query:Where("steamid", steamID64)
         query:Callback(function(result)
-            if (IsValid(ply) and istable(result) and #result > 0 and result[1].points) then
+            if IsValid(ply) and istable(result) and #result > 0 and result[1].points then
                 local updateQuery = mysql:Update("hg_pointshop")
                     updateQuery:Update("steam_name", name)
                     updateQuery:Where("steamid", steamID64)
@@ -78,10 +149,8 @@ hook.Add("PlayerInitialSpawn", "Pointshop_OnInitSpawn", function(ply)
                 PLUGIN.PlayerInstances[steamID64].points = tonumber(result[1].points) or 0
                 PLUGIN.PlayerInstances[steamID64].items = util.JSONToTable(result[1].items or "[]") or {}
 
-                -- грузим донат-баланс из RK_Balance
                 RK_Balance.Load(ply)
 
-                -- RK_Balance.Load асинхронный -> даём чуть времени и синкаем donpoints в vars
                 timer.Simple(0.5, function()
                     if not IsValid(ply) then return end
                     PS_RefreshDonPoints(ply)
@@ -96,7 +165,7 @@ hook.Add("PlayerInitialSpawn", "Pointshop_OnInitSpawn", function(ply)
                     insertQuery:Insert("items", util.TableToJSON({}))
                 insertQuery:Execute()
 
-                PLUGIN.PlayerInstances[steamID64] = {donpoints=0, points=0, items={}}
+                PLUGIN.PlayerInstances[steamID64] = { donpoints = 0, points = 0, items = {} }
 
                 RK_Balance.Load(ply)
 
@@ -116,24 +185,18 @@ local plyMeta = FindMetaTable("Player")
 function plyMeta:GetPointshopVars()
     local steamID64 = self:SteamID64()
     if not PLUGIN.PlayerInstances[steamID64] then
-        PLUGIN.PlayerInstances[steamID64] = {donpoints=0, points=0, items={}}
+        PLUGIN.PlayerInstances[steamID64] = { donpoints = 0, points = 0, items = {} }
     end
-
-    -- всегда подтягиваем актуальный донат-баланс из RK_Balance
     PLUGIN.PlayerInstances[steamID64].donpoints = math.max(0, tonumber(self.RK_DonateBalance) or 0)
-
     return PLUGIN.PlayerInstances[steamID64]
 end
 
--- =========================
--- Обычные points (как было)
--- =========================
 function plyMeta:PS_AddPoints(ammout)
     local pointshopVars = self:GetPointshopVars()
     ammout = tonumber(ammout) or 0
     if ammout < 1 then return false end
     self:PS_SetPoints(pointshopVars.points + ammout)
-    return true, ammout .. " points added"
+    return true, tostring(ammout) .. " поинтов добавлено"
 end
 
 function plyMeta:PS_SetPoints(value)
@@ -154,55 +217,45 @@ end
 function plyMeta:PS_TakePoints(ammout, callback)
     local pointshopVars = self:GetPointshopVars()
     ammout = tonumber(ammout) or 0
-    if ammout > pointshopVars.points then return false, "Вам не хватает." end
+    if ammout > pointshopVars.points then return false, "Вам не хватает поинтов." end
     self:PS_SetPoints(pointshopVars.points - ammout)
     if callback then callback(self) end
-    return true
+    return true, ""
 end
 
--- =========================================================
--- Донат поинты: теперь через RK_Balance (rk_donate_balance.balance)
--- =========================================================
 function plyMeta:PS_AddDPoints(ammout)
+    EnsureRKBalance()
     ammout = tonumber(ammout) or 0
     if ammout < 1 then return false end
-    -- + к балансу
     RK_Balance.Add(self, ammout)
-    -- обновим кэш vars
     PS_RefreshDonPoints(self)
     return true
 end
 
 function plyMeta:PS_SetDPoints(value)
+    EnsureRKBalance()
     value = tonumber(value) or 0
     local cur = math.max(0, tonumber(self.RK_DonateBalance) or 0)
-
     local delta = value - cur
     if delta == 0 then
         PS_RefreshDonPoints(self)
         return
     end
-
     RK_Balance.Add(self, delta)
     PS_RefreshDonPoints(self)
 end
 
 function plyMeta:PS_TakeDPoints(ammout, callback)
+    EnsureRKBalance()
     local cur = math.max(0, tonumber(self.RK_DonateBalance) or 0)
     ammout = tonumber(ammout) or 0
-
-    if ammout > cur then return false, "Вам не хватает." end
-
+    if ammout > cur then return false, "Вам не хватает донат-поинтов." end
     RK_Balance.Add(self, -ammout)
     PS_RefreshDonPoints(self)
-
     if callback then callback(self) end
     return true, ""
 end
 
--- =========================
--- Items (как было)
--- =========================
 function plyMeta:PS_SetItems(tItems)
     local steamID64 = self:SteamID64()
     local pointshopVars = self:GetPointshopVars()
@@ -216,7 +269,7 @@ function plyMeta:PS_SetItems(tItems)
 end
 
 function plyMeta:PS_AddItem(uid)
-    if not hg.PointShop.Items[uid] then return end
+    if not hg.PointShop or not hg.PointShop.Items or not hg.PointShop.Items[uid] then return end
     local pointshopVars = self:GetPointshopVars()
     pointshopVars.items[uid] = true
     self:PS_SetItems(pointshopVars.items)
@@ -228,13 +281,9 @@ function plyMeta:PS_HasItem(uid)
     return pointshopVars.items[uid] or false
 end
 
--- =========================
--- NET
--- =========================
 util.AddNetworkString("hg_pointshop_net")
 
 function PLUGIN:NET_SendPointShopVars(ply)
-    -- перед отправкой подтягиваем донат-баланс из RK_Balance
     PS_RefreshDonPoints(ply)
 
     net.Start("hg_pointshop_net")
@@ -246,7 +295,7 @@ util.AddNetworkString("hg_pointshop_send_notificate")
 
 function PLUGIN:NET_BuyItem(ply, uid)
     if not util.IsBinaryModuleInstalled("mysqloo") and not mysql then return end
-    if not hg.PointShop.Items[uid] then return end
+    if not hg.PointShop or not hg.PointShop.Items or not hg.PointShop.Items[uid] then return end
 
     if ply:PS_HasItem(uid) then
         PLUGIN:NET_SendPointShopVars(ply)
@@ -305,10 +354,6 @@ timer.Create("ZCity_PointsTimer", POINTS_INTERVAL, 0, function()
     end
 end)
 
--- =========================
--- Tebex команды (как было)
--- Теперь premium добавляет В rk_donate_balance через RK_Balance
--- =========================
 local function FindPlayerFinal(input)
     if not input then return nil end
     input = string.Replace(input, '"', "")
@@ -331,10 +376,10 @@ concommand.Add("zcity_tebex_add", function(ply, cmd, args)
     if target and amount then
         target:PS_AddPoints(amount)
         PLUGIN:NET_SendPointShopVars(target)
-        print("[TEBEX] SUKCES: Dodano " .. amount .. " ZP dla " .. target:Nick())
-        if IsValid(target) then target:ChatPrint("[Магазин] Спасибо! Вы получили его. " .. amount .. " ZP!") end
+        print("[TEBEX] УСПЕХ: добавлено " .. amount .. " ZP для " .. target:Nick())
+        if IsValid(target) then target:ChatPrint("[Магазин] Спасибо! Вы получили " .. amount .. " ZP!") end
     else
-        print("[TEBEX] ERROR: Игрок не найден или неверный номер.")
+        print("[TEBEX] ОШИБКА: игрок не найден или сумма неверная.")
     end
 end)
 
@@ -345,11 +390,11 @@ concommand.Add("zcity_tebex_add_premium", function(ply, cmd, args)
     local amount = tonumber(args[2])
 
     if target and amount then
-        target:PS_AddDPoints(amount) -- теперь через RK_Balance -> rk_donate_balance
+        target:PS_AddDPoints(amount)
         PLUGIN:NET_SendPointShopVars(target)
-        print("[TEBEX] SUKCES: Dodano " .. amount .. " DZP dla " .. target:Nick())
-        if IsValid(target) then target:ChatPrint("[SKLEP PREMIUM] Спасибо! Вы получили его. " .. amount .. " DZP!") end
+        print("[TEBEX] УСПЕХ: добавлено " .. amount .. " DZP для " .. target:Nick())
+        if IsValid(target) then target:ChatPrint("[ПРЕМИУМ МАГАЗИН] Спасибо! Вы получили " .. amount .. " DZP!") end
     else
-        print("[TEBEX] ERROR: Игрок не найден или неверный номер.")
+        print("[TEBEX] ОШИБКА: игрок не найден или сумма неверная.")
     end
 end)

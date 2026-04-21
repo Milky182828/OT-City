@@ -33,80 +33,93 @@ end
 surface.CreateFont("ZCity_VerySuperTiny", {
 	font = font(),
 	size = ScreenScale(5),
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_SuperTiny", {
 	font = font(),
 	size = ScreenScale(6),
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Fixed_SuperTiny", {
 	font = font(),
 	size = 18,
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Tiny", {
 	font = font(),
 	size = ScreenScale(8),
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Fixed_Tiny", {
 	font = font(),
 	size = 25,
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Small", {
 	font = font(),
 	size = ScreenScale(15),
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Medium", {
 	font = font(),
 	size = ScreenScale(25),
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Fixed_Medium", {
 	font = font(),
 	size = 55,
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Big", {
 	font = font(),
 	size = ScreenScale(35),
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Fixed_Big", {
 	font = font(),
 	size = 300,
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Fixed_Medium_Light", {
 	font = font(),
 	size = 25,
-	weight = 200
+	weight = 200,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Fixed_Medium_Light_Blur", {
 	font = font(),
 	size = 25,
 	weight = 200,
-	blursize = 4
+	blursize = 4,
+	extended = true
 })
 
 surface.CreateFont("ZCity_Fixed_Icons_Small", {
 	font = "fontello",
 	size = 22,
-	weight = 500
+	weight = 500,
+	extended = true
 })
 --//
 
